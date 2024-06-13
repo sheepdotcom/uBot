@@ -1,0 +1,11 @@
+{
+	"geode": "3.0.0-alpha.2",
+	"gd": {
+		"win": "2.206"
+	},
+	"version": "v0.0.1-alpha.1",
+	"id": "sheepdotcom.uwubot",
+	"name": "uwuBot",
+	"developer": "sheepdotcom",
+	"description": "UwU"
+}
