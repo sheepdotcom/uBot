@@ -3,9 +3,10 @@
 	"gd": {
 		"win": "2.206"
 	},
-	"version": "v0.0.1-alpha.1",
+	"version": "v0.0.1-alpha.2",
 	"id": "sheepdotcom.uwubot",
 	"name": "uwuBot",
 	"developer": "sheepdotcom",
-	"description": "UwU"
+	"description": "UwU",
+	"repository": "https://github.com/sheepdotcom/uwuBot"
 }
