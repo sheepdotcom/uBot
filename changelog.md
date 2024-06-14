@@ -1,3 +1,8 @@
+# v0.0.1-alpha.3
+
+- You can now record and replay a single, unsaveble macro
+- Fixed replay toggle not going into replay state :3
+
 # v0.0.1-alpha.2
 
 - Macro Popup (Including button to open popup in PauseLayer)

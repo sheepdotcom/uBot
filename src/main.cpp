@@ -2,6 +2,7 @@
 #include <Geode/modify/PlayLayer.hpp>
 #include <Geode/modify/GJBaseGameLayer.hpp>
 #include <Geode/modify/PauseLayer.hpp>
+#include <Geode/modify/PlayerObject.hpp>
 
 using namespace geode::prelude;
 
@@ -21,7 +22,7 @@ struct macroData {
 	int button; //You actually need this because platformer mode :3
 	int frame;
 	bool holding; //This name sounded wrong to me until I realized how stupid the name I gave it was.
-	playerData playerData; //Why store both p1 and p2 data when you already have a bool for isPlayer1?
+	playerData pData; //Why store both p1 and p2 data when you already have a bool for isPlayer1?
 };
 
 enum state {
@@ -34,13 +35,15 @@ class uwuBot {
 public:
 	state state = off;
 	std::vector<macroData> macroData;
+	int currentAction;
 
 	int getCurrentFrame() {
 		return (PlayLayer::get() != nullptr) ? PlayLayer::get()->m_gameState.m_currentProgress : -1; //This is real? Crash fix?
 	}
 
-	void recordAction(bool isPlayer1, int button, int frame, bool holding, playerData playerData) {
+	void recordInput(bool isPlayer1, int button, int frame, bool holding, playerData playerData) {
 		macroData.push_back({isPlayer1, button, frame, holding, playerData});
+		geode::log::debug("pushed back macro data");
 	}
 };
 
@@ -152,7 +155,27 @@ public:
 
 	void togglePlaying(CCObject* p0) {
 		if (catgirl.state == state::recording) this->recordingToggle->toggle(false);
-		catgirl.state = (catgirl.state == state::playing) ? state::off : state::recording;
+		catgirl.state = (catgirl.state == state::playing) ? state::off : state::playing;
+	}
+};
+
+void clearState() {
+	catgirl.state = state::off;
+}
+
+void resetStuff() {
+	catgirl.currentAction = 0;
+	for (size_t player = 0; player < 2; player++) {
+		auto p = ((player == 0) ? GJBaseGameLayer::get()->m_player1 : GJBaseGameLayer::get()->m_player2);
+		p->releaseAllButtons();
+	}
+}
+
+class $modify(PlayerObject) {
+	void playerDestroyed(bool p0) {
+		resetStuff();
+		PlayerObject::playerDestroyed(p0);
+		geode::log::debug("player destroyed");
 	}
 };
 
@@ -168,6 +191,16 @@ class $modify(PauseLayer) {
 		auto rightMenu = this->getChildByID("right-button-menu");
 		rightMenu->addChild(btn);
 		rightMenu->updateLayout();
+	}
+
+	void onQuit(CCObject* sender) {
+		PauseLayer::onQuit(sender);
+		clearState();
+	}
+
+	void goEdit() {
+		PauseLayer::goEdit();
+		clearState();
 	}
 };
 
@@ -187,9 +220,37 @@ class $modify(PlayLayer) {
 
 		return true;
 	}
+
+	void resetLevel() {
+		resetStuff();
+		PlayLayer::resetLevel();
+	}
 };
 
 class $modify(GJBaseGameLayer) {
+	void handleButton(bool holding, int button, bool player1) {
+		GJBaseGameLayer::handleButton(holding, button, player1);
+		if (catgirl.state == state::recording) {
+			playerData pData;
+			if (player1) {
+				pData = {
+					this->m_player1->getPositionX(),
+					this->m_player1->getPositionY()
+				};
+			}
+			else {
+				pData = {
+					this->m_player2->getPositionX(),
+					this->m_player2->getPositionY()
+				};
+			}
+			catgirl.recordInput(player1, button, catgirl.getCurrentFrame(), holding, pData);
+		}
+		else if (catgirl.state == state::playing) {
+			
+		}
+	}
+
 	void update(float dt) {
 		if (frameLabel != nullptr) {
 			frameLabel->setString(std::format("Frame: {}", catgirl.getCurrentFrame()).c_str());
@@ -200,6 +261,29 @@ class $modify(GJBaseGameLayer) {
 		else if (catgirl.getCurrentFrame() == 91) {
 			m_player1->releaseButton(PlayerButton::Jump);
 		}*/
+		if (catgirl.state == state::playing) {
+			int frame = catgirl.getCurrentFrame();
+			if (!GJBaseGameLayer::get()->m_player1->m_isDead) {
+				while (catgirl.currentAction < static_cast<int>(catgirl.macroData.size()) && frame >= catgirl.macroData[catgirl.currentAction].frame && !this->m_player1->m_isDead) {
+					auto data = catgirl.macroData[catgirl.currentAction];
+					
+					auto player = (data.isPlayer1) ? GJBaseGameLayer::get()->m_player1 : GJBaseGameLayer::get()->m_player2;
+					if (data.frame == frame) {
+						if (data.holding) {
+							player->pushButton(static_cast<PlayerButton>(data.button));
+						}
+						else {
+							player->releaseButton(static_cast<PlayerButton>(data.button));
+						}
+						geode::log::debug("found frame in macro");
+					}
+
+					catgirl.currentAction++;
+					geode::log::debug("check ran");
+				}
+			}
+		}
+
 		GJBaseGameLayer::update(dt);
 	}
 };
