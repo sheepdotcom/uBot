@@ -43,11 +43,190 @@ public:
 
 	void recordInput(bool isPlayer1, int button, int frame, bool holding, playerData playerData) {
 		macroData.push_back({isPlayer1, button, frame, holding, playerData});
-		geode::log::debug("pushed back macro data");
 	}
 };
 
 uwuBot catgirl; //Never change this variable name, catgirl
+
+class SaveMacroPopup : public CCLayerColor {
+protected:
+	bool init(float mWidth, float mHeight) {
+		auto winSize = CCDirector::sharedDirector()->getWinSize();
+		if (!CCLayerColor::initWithColor({ 0,0,0,105 })) return false;
+
+		//MAIN LAYER NO WAY TRIGDHIFGRHDGIDHRIUGH%$*EITWGHE*GHRE*VHGDFIHGRIDSGI%$UHEGIDRFHSIFREHWEFHJWIS
+		auto mainLayer = CCLayer::create();
+		mainLayer->setID("main-layer");
+		this->addChild(mainLayer);
+		auto bg = CCScale9Sprite::create("GJ_square02.png", { 0.f,0.f,80.f,80.f });
+		bg->setContentSize(ccp(mWidth, mHeight));
+		bg->setPosition(winSize / 2);
+		bg->setID("menu-background");
+		mainLayer->addChild(bg);
+
+		//Close button thing woah
+		auto buttonMenu = CCMenu::create();
+		buttonMenu->setPosition(ccp(0.f,0.f));
+		buttonMenu->setID("button-menu");
+		mainLayer->addChild(buttonMenu);
+		auto closeBtn = CCMenuItemSpriteExtra::create(CCSprite::createWithSpriteFrameName("GJ_closeBtn_001.png"), this, menu_selector(SaveMacroPopup::onClose));
+		closeBtn->setPosition(ccp((winSize.width/2)-(mWidth/2)+2.5f,(winSize.height/2)+(mHeight/2)-2.5f));
+		closeBtn->setID("close-button");
+		buttonMenu->addChild(closeBtn);
+
+		//menu
+		auto menu = CCMenu::create();
+		menu->setPosition(ccp(0.f,0.f));
+		menu->setID("main-menu");
+		mainLayer->addChild(menu);
+
+		//scrolling
+		auto scrollBG = CCScale9Sprite::create("square02_001.png", {0.f,0.f,80.f,80.f});
+		scrollBG->setContentSize(ccp((mWidth-50.f),(mHeight-50.f)));
+		scrollBG->setPosition(ccp((winSize.width/2),(winSize.height/2)));
+		scrollBG->setOpacity(100.f);
+		scrollBG->setID("macro-scroll-bg");
+		menu->addChild(scrollBG);
+		auto scroll = ScrollLayer::create({0.f,0.f,80.f,80.f}, true, true);
+		scroll->setContentSize(scrollBG->getContentSize());
+		scroll->setPosition(scrollBG->getPosition());
+		scroll->setID("macro-scroll-layer");
+		menu->addChild(scroll);
+
+		//Is that the save button?
+		auto saveSprite = ButtonSprite::create("Save Macro");
+		auto saveButton = CCMenuItemSpriteExtra::create(saveSprite, this, menu_selector(SaveMacroPopup::saveMacro));
+		saveButton->setPosition(ccp((winSize.width/2)-(mWidth/4),(winSize.height/2)-(mWidth/2)+50.f));
+		menu->addChild(saveButton);
+
+		handleTouchPriority(this);
+		this->setMouseEnabled(true);
+		this->setKeypadEnabled(true);
+		this->setTouchEnabled(true);
+		CCDirector::sharedDirector()->getTouchDispatcher()->addTargetedDelegate(this, -666, true);
+
+		this->setZOrder(24);
+		this->setID("SaveMacroPopup");
+
+		return true;
+	}
+
+	static SaveMacroPopup* create() {
+		auto ret = new SaveMacroPopup();
+		if (ret && ret->init(300.f, 200.f)) {
+			ret->autorelease();
+			return ret;
+		}
+		CC_SAFE_DELETE(ret);
+		return nullptr;
+	}
+public:
+	void openPopup(CCObject* p0) {
+		auto popup = SaveMacroPopup::create();
+
+		CCDirector::sharedDirector()->getRunningScene()->addChild(popup);
+	}
+	void onClose(CCObject* p0) {
+		this->removeFromParentAndCleanup(true);
+	}
+
+	void keyBackClicked() {
+		onClose(nullptr);
+	}
+
+	void saveMacro(CCObject* p0) {
+		std::string saveLoc = Mod::get()->getSaveDir().string();
+		saveLoc = saveLoc + "test" + ".uwu";
+
+		std::ofstream file(saveLoc);
+	}
+};
+
+class LoadMacroPopup : public CCLayerColor {
+protected:
+	bool init(float mWidth, float mHeight) {
+		auto winSize = CCDirector::sharedDirector()->getWinSize();
+		if (!CCLayerColor::initWithColor({ 0,0,0,105 })) return false;
+
+		//Init main layer
+		auto mainLayer = CCLayer::create();
+		mainLayer->setID("main-layer");
+		this->addChild(mainLayer);
+		auto bg = CCScale9Sprite::create("GJ_square02.png", { 0.f,0.f,80.f,80.f });
+		bg->setContentSize(ccp(mWidth, mHeight));
+		bg->setPosition(winSize / 2);
+		bg->setID("menu-background");
+		mainLayer->addChild(bg);
+
+		//Gotta close the menu
+		auto buttonMenu = CCMenu::create();
+		buttonMenu->setPosition(ccp(0,0));
+		buttonMenu->setID("button-menu");
+		mainLayer->addChild(buttonMenu);
+		auto closeBtn = CCMenuItemSpriteExtra::create(CCSprite::createWithSpriteFrameName("GJ_closeBtn_001.png"), this, menu_selector(LoadMacroPopup::onClose));
+		closeBtn->setPosition(ccp((winSize.width/2)-(mWidth/2)+2.5f,(winSize.height/2+(mHeight/2)-2.5f)));
+		closeBtn->setID("close-button");
+		buttonMenu->addChild(closeBtn);
+
+		//menu no way wtf
+		auto menu = CCMenu::create();
+		menu->setPosition(ccp(0.f,0.f));
+		menu->setID("main-menu");
+		mainLayer->addChild(menu);
+
+		//scroll layer of course
+		auto scrollBG = CCScale9Sprite::create("square02_001.png", { 0.f,0.f,80.f,80.f });
+		scrollBG->setContentSize(ccp((mWidth - 50.f), (mHeight - 50.f)));
+		scrollBG->setPosition(ccp((winSize.width / 2), (winSize.height / 2)));
+		scrollBG->setOpacity(100.f);
+		scrollBG->setID("macro-scroll-bg");
+		menu->addChild(scrollBG);
+		auto scroll = ScrollLayer::create({ 0.f,0.f,80.f,80.f }, true, true);
+		scroll->setContentSize(scrollBG->getContentSize());
+		scroll->setPosition(scrollBG->getPosition());
+		scroll->setID("macro-scroll-layer");
+		menu->addChild(scroll);
+
+		handleTouchPriority(this);
+		this->setMouseEnabled(true);
+		this->setKeypadEnabled(true);
+		this->setTouchEnabled(true);
+		CCDirector::sharedDirector()->getTouchDispatcher()->addTargetedDelegate(this, -665, true);
+
+		this->setZOrder(23);
+		this->setID("LoadMacroPopup");
+
+		return true;
+	}
+
+	static LoadMacroPopup* create() {
+		auto ret = new LoadMacroPopup();
+		if (ret && ret->init(300.f, 200.f)) {
+			ret->autorelease();
+			return ret;
+		}
+		CC_SAFE_DELETE(ret);
+		return nullptr;
+	}
+public:
+	void openPopup(CCObject* p0) {
+		auto popup = LoadMacroPopup::create();
+
+		CCDirector::sharedDirector()->getRunningScene()->addChild(popup);
+	}
+
+	void onClose(CCObject* p0) {
+		this->removeFromParentAndCleanup(true);
+	}
+
+	void keyBackClicked() {
+		onClose(nullptr);
+	}
+};
+
+void displayMacroList(ScrollLayer* scroll) {
+	//Not implemented yet
+}
 
 class MacroPopup : public CCLayerColor {
 protected:
@@ -60,7 +239,7 @@ protected:
 
 		//Background for popup
 		auto mainLayer = CCLayer::create();
-		mainLayer->setID("");
+		mainLayer->setID("main-layer");
 		this->addChild(mainLayer);
 		auto bg = CCScale9Sprite::create("GJ_square02.png", {0.f,0.f,80.f,80.f});
 		bg->setContentSize(ccp(mWidth, mHeight));
@@ -70,10 +249,11 @@ protected:
 
 		//Button for closing the menu :3
 		auto buttonMenu = CCMenu::create();
+		buttonMenu->setPosition(ccp(0.f, 0.f));
 		buttonMenu->setID("button-menu");
 		mainLayer->addChild(buttonMenu);
 		auto closeBtn = CCMenuItemSpriteExtra::create(CCSprite::createWithSpriteFrameName("GJ_closeBtn_001.png"), this, menu_selector(MacroPopup::onClose));
-		closeBtn->setPosition(ccp((-mWidth+26.f)/2,(mHeight-26.75f)/2));
+		closeBtn->setPosition(ccp((winSize.width/2)-(mWidth/2)+2.5f,(winSize.height/2)+(mHeight/2)-2.5f));
 		closeBtn->setID("close-button");
 		buttonMenu->addChild(closeBtn);
 
@@ -110,6 +290,22 @@ protected:
 		playingToggle->setID("playing-toggle");
 		menu->addChild(playingToggle);
 		menu->addChild(playingLabel); //Order switching stuff idk why im doing all this
+
+		//Save Button?
+		auto saveSprite = ButtonSprite::create("Save");
+		saveSprite->setScale(0.7f);
+		auto saveButton = CCMenuItemSpriteExtra::create(saveSprite, this, menu_selector(SaveMacroPopup::openPopup));
+		saveButton->setPosition(ccp((winSize.width/2)-(mWidth/4),(recordingToggle->getPositionY())-30.f));
+		saveButton->setID("save-button");
+		menu->addChild(saveButton);
+
+		//Load Button?
+		auto loadSprite = ButtonSprite::create("Load");
+		loadSprite->setScale(0.7f);
+		auto loadButton = CCMenuItemSpriteExtra::create(loadSprite, this, menu_selector(LoadMacroPopup::openPopup));
+		loadButton->setPosition(ccp((winSize.width/2)+(mWidth/4),(playingToggle->getPositionY())-30.f));
+		loadButton->setID("load-button");
+		menu->addChild(loadButton);
 
 		handleTouchPriority(this);
 		this->setTouchEnabled(true);
@@ -275,11 +471,9 @@ class $modify(GJBaseGameLayer) {
 						else {
 							player->releaseButton(static_cast<PlayerButton>(data.button));
 						}
-						geode::log::debug("found frame in macro");
 					}
 
 					catgirl.currentAction++;
-					geode::log::debug("check ran");
 				}
 			}
 		}

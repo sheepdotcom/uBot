@@ -1,3 +1,9 @@
+# v0.0.1-alpha.4
+
+- move close button in menu
+- remove debug
+- macro save/load popups along with buttons (nothing in popups yet hehe i need to commit now)
+
 # v0.0.1-alpha.3
 
 - You can now record and replay a single, unsaveble macro
