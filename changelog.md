@@ -2,7 +2,8 @@
 
 - move close button in menu
 - remove debug
-- macro save/load popups along with buttons (nothing in popups yet hehe i need to commit now)
+- macro save/load popups along with buttons (yes saving works not loading though)
+- updated to v3.0.0-beta.1 (came out as i was coding)
 
 # v0.0.1-alpha.3
 

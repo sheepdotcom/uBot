@@ -3,6 +3,7 @@
 #include <Geode/modify/GJBaseGameLayer.hpp>
 #include <Geode/modify/PauseLayer.hpp>
 #include <Geode/modify/PlayerObject.hpp>
+#include <Geode/ui/TextInput.hpp>
 
 using namespace geode::prelude;
 
@@ -48,8 +49,10 @@ public:
 
 uwuBot catgirl; //Never change this variable name, catgirl
 
-class SaveMacroPopup : public CCLayerColor {
+class SaveMacroPopup : public CCLayerColor, public TextInputDelegate {
 protected:
+	TextInput* m_macroNameInput = nullptr;
+
 	bool init(float mWidth, float mHeight) {
 		auto winSize = CCDirector::sharedDirector()->getWinSize();
 		if (!CCLayerColor::initWithColor({ 0,0,0,105 })) return false;
@@ -89,21 +92,27 @@ protected:
 		menu->addChild(scrollBG);
 		auto scroll = ScrollLayer::create({0.f,0.f,80.f,80.f}, true, true);
 		scroll->setContentSize(scrollBG->getContentSize());
-		scroll->setPosition(scrollBG->getPosition());
+		scroll->setPosition(ccp((winSize.width/2),(winSize.height/2)));
 		scroll->setID("macro-scroll-layer");
 		menu->addChild(scroll);
 
 		//Is that the save button?
 		auto saveSprite = ButtonSprite::create("Save Macro");
+		saveSprite->setScale(0.75f);
 		auto saveButton = CCMenuItemSpriteExtra::create(saveSprite, this, menu_selector(SaveMacroPopup::saveMacro));
-		saveButton->setPosition(ccp((winSize.width/2)-(mWidth/4),(winSize.height/2)-(mWidth/2)+50.f));
+		saveButton->setPosition(ccp((winSize.width/2)-(mWidth/4),(winSize.height/2)-(mHeight/2)+25.f));
 		menu->addChild(saveButton);
+
+		//Input thy name here
+		m_macroNameInput = TextInput::create(100.f, "Macro Name", "bigFont.fnt");
+		m_macroNameInput->setPosition(ccp((winSize.width/2)+(mWidth/4),(winSize.height/2)-(mHeight/2)+25.f));
+		menu->addChild(m_macroNameInput);
 
 		handleTouchPriority(this);
 		this->setMouseEnabled(true);
 		this->setKeypadEnabled(true);
 		this->setTouchEnabled(true);
-		CCDirector::sharedDirector()->getTouchDispatcher()->addTargetedDelegate(this, -666, true);
+		CCDirector::sharedDirector()->getTouchDispatcher()->addTargetedDelegate(this, -504, true);
 
 		this->setZOrder(24);
 		this->setID("SaveMacroPopup");
@@ -135,10 +144,27 @@ public:
 	}
 
 	void saveMacro(CCObject* p0) {
+		if (m_macroNameInput->getString().empty()) {
+			FLAlertLayer::create("Save Macro", "You must type in a macro name!", "OK")->show();
+			return;
+		}
+
 		std::string saveLoc = Mod::get()->getSaveDir().string();
-		saveLoc = saveLoc + "test" + ".uwu";
+		saveLoc = saveLoc + "/" + m_macroNameInput->getString() + ".uwu";
 
 		std::ofstream file(saveLoc);
+
+		if (file.is_open()) {
+			//Not final method
+			for (auto &action : catgirl.macroData) {
+				file << action.frame << "|" << action.holding << "|" << action.button << "|" << action.isPlayer1 << "|" << action.pData.xPos << "|" << action.pData.yPos << "\n";
+			}
+			file.close();
+			FLAlertLayer::create("Save Macro", "Macro successfully saved!", "OK")->show();
+		}
+		else {
+			FLAlertLayer::create("Save Macro", "Error while saving.", "OK")->show();
+		}
 	}
 };
 
@@ -191,7 +217,7 @@ protected:
 		this->setMouseEnabled(true);
 		this->setKeypadEnabled(true);
 		this->setTouchEnabled(true);
-		CCDirector::sharedDirector()->getTouchDispatcher()->addTargetedDelegate(this, -665, true);
+		CCDirector::sharedDirector()->getTouchDispatcher()->addTargetedDelegate(this, -504, true);
 
 		this->setZOrder(23);
 		this->setID("LoadMacroPopup");
@@ -311,7 +337,7 @@ protected:
 		this->setTouchEnabled(true);
 		this->setKeypadEnabled(true);
 		this->setMouseEnabled(true);
-		CCDirector::sharedDirector()->getTouchDispatcher()->addTargetedDelegate(this, -612, true);
+		CCDirector::sharedDirector()->getTouchDispatcher()->addTargetedDelegate(this, -503, true);
 
 		this->setZOrder(22);
 		this->setID("MacroPopup");
