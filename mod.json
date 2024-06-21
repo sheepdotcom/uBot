@@ -1,9 +1,9 @@
 {
-	"geode": "3.0.0-beta.1",
+	"geode": "3.0.0-beta.5",
 	"gd": {
 		"win": "2.206"
 	},
-	"version": "v0.0.1-alpha.4",
+	"version": "v0.1.0-beta.1",
 	"id": "sheepdotcom.uwubot",
 	"name": "uwuBot",
 	"developer": "sheepdotcom",

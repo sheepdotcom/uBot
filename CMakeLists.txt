@@ -5,10 +5,11 @@ set(CMAKE_CXX_VISIBILITY_PRESET hidden)
 
 project(uwuBot VERSION 1.0.0)
 
-add_library(${PROJECT_NAME} SHARED
-    src/main.cpp
-    # Add any extra C++ source files here
+file(GLOB_RECURSE SOURCES
+    src/*.cpp
 )
+
+add_library(${PROJECT_NAME} SHARED ${SOURCES})
 
 if (NOT DEFINED ENV{GEODE_SDK})
     message(FATAL_ERROR "Unable to find Geode SDK! Please define GEODE_SDK environment variable to point to Geode")
@@ -17,5 +18,9 @@ else()
 endif()
 
 add_subdirectory($ENV{GEODE_SDK} ${CMAKE_CURRENT_BINARY_DIR}/geode)
+
+CPMADDPACKAGE("gh:matcool/gd-imgui-cocos#09a9555")
+
+target_link_libraries(${PROJECT_NAME} imgui-cocos)
 
 setup_geode_mod(${PROJECT_NAME})

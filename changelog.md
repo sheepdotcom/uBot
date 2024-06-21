@@ -1,3 +1,8 @@
+# v0.1.0-beta.1
+
+- Complete Project Reformat
+- ImGui Menu Test alongside the Android UI
+
 # v0.0.1-alpha.4
 
 - move close button in menu

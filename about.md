@@ -1,3 +1,3 @@
 # UwU Bot
 
-simple bot for your botting needs :3
+simple but complex bot for your botting needs :3
