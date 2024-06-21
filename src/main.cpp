@@ -3,6 +3,7 @@
 #include <Geode/modify/GJBaseGameLayer.hpp>
 #include <Geode/modify/PauseLayer.hpp>
 #include <Geode/modify/PlayerObject.hpp>
+#include <Geode/modify/EndLevelLayer.hpp>
 #include "bot.hpp"
 #include "UI/ImGui.hpp"
 #include "UI/Android.hpp"
@@ -62,8 +63,9 @@ class $modify(PlayLayer) {
 	}
 
 	void resetLevel() {
-		uwuBot::catgirl->reset();
 		PlayLayer::resetLevel();
+		uwuBot::catgirl->m_currentAction = 0;
+		geode::log::debug("reset");
 	}
 };
 
@@ -72,18 +74,11 @@ class $modify(GJBaseGameLayer) {
 		GJBaseGameLayer::handleButton(holding, button, player1);
 		if (uwuBot::catgirl->m_state == state::recording) {
 			playerData pData;
-			if (player1) {
-				pData = {
-					this->m_player1->getPositionX(),
-					this->m_player1->getPositionY()
-				};
-			}
-			else {
-				pData = {
-					this->m_player2->getPositionX(),
-					this->m_player2->getPositionY()
-				};
-			}
+			auto player = (player1) ? this->m_player1 : this->m_player2; //Saves some code :3
+			pData = {
+				player->getPositionX(),
+				player->getPositionY()
+			};
 			uwuBot::catgirl->recordInput(player1, button, uwuBot::catgirl->getCurrentFrame(), holding, pData);
 		}
 		else if (uwuBot::catgirl->m_state == state::playing) {
@@ -95,6 +90,10 @@ class $modify(GJBaseGameLayer) {
 		if (frameLabel != nullptr) {
 			frameLabel->setString(std::format("Frame: {}", uwuBot::catgirl->getCurrentFrame()).c_str());
 		}
+		GJBaseGameLayer::update(dt);
+	}
+
+	void processCommands(float p0) {
 		if (uwuBot::catgirl->m_state == state::playing) {
 			int frame = uwuBot::catgirl->getCurrentFrame();
 			if (!GJBaseGameLayer::get()->m_player1->m_isDead) {
@@ -116,7 +115,19 @@ class $modify(GJBaseGameLayer) {
 			}
 		}
 
-		GJBaseGameLayer::update(dt);
+		GJBaseGameLayer::processCommands(p0);
+	}
+};
+
+class $modify(EndLevelLayer) {
+	void goEdit() {
+		EndLevelLayer::goEdit();
+		uwuBot::catgirl->clearState();
+	}
+
+	void onMenu(CCObject* sender) {
+		EndLevelLayer::onMenu(sender);
+		uwuBot::catgirl->clearState();
 	}
 };
 

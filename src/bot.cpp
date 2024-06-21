@@ -44,9 +44,5 @@ void uwuBot::clearState() {
 }
 
 void uwuBot::reset() {
-	catgirl->m_currentAction = 0;
-	for (size_t player = 0; player < 2; player++) {
-		auto p = ((player == 0) ? GJBaseGameLayer::get()->m_player1 : GJBaseGameLayer::get()->m_player2);
-		p->releaseAllButtons();
-	}
+	
 }
