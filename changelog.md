@@ -1,6 +1,6 @@
 # v0.1.0-beta.2
 
-- 
+- Recording with checkpoints now works properly
 
 # v0.1.0-beta.1
 

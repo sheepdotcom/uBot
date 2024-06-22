@@ -65,7 +65,34 @@ class $modify(PlayLayer) {
 	void resetLevel() {
 		PlayLayer::resetLevel();
 		uwuBot::catgirl->m_currentAction = 0;
-		geode::log::debug("reset");
+		for (size_t player = 0; player < 2; player++) {
+			auto p = ((player == 0) ? this->m_player1 : this->m_player2);
+			p->releaseAllButtons();
+		}
+		if (uwuBot::catgirl->m_state == state::recording) {
+			if (this->m_isPracticeMode && uwuBot::catgirl->getCurrentFrame() >= 0) {
+				int frame = uwuBot::catgirl->getCurrentFrame();
+				if (!uwuBot::catgirl->m_macroData.empty()) {
+					for (int i = uwuBot::catgirl->m_macroData.size() - 1; i >= 0; i--) { //reverse iterator seems wierd so im using this
+						if (uwuBot::catgirl->m_macroData[i].frame >= frame) {
+							uwuBot::catgirl->m_macroData.erase(uwuBot::catgirl->m_macroData.begin() + i);
+						}
+						else break;
+					}
+				}
+			}
+			else {
+				if (!uwuBot::catgirl->m_macroData.empty()) {
+					uwuBot::catgirl->m_macroData.clear();
+				}
+			}
+		}
+		geode::log::debug("resetLevel");
+	}
+
+	void levelComplete() {
+		PlayLayer::levelComplete();
+		uwuBot::catgirl->clearState();
 	}
 };
 
