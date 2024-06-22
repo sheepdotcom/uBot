@@ -115,7 +115,7 @@ class $modify(GJBaseGameLayer) {
 
 	void update(float dt) {
 		if (frameLabel != nullptr) {
-			frameLabel->setString(std::format("Frame: {}", uwuBot::catgirl->getCurrentFrame()).c_str());
+			frameLabel->setString(fmt::format("Frame: {}", uwuBot::catgirl->getCurrentFrame()).c_str());
 		}
 		GJBaseGameLayer::update(dt);
 	}
