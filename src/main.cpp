@@ -4,6 +4,7 @@
 #include <Geode/modify/PauseLayer.hpp>
 #include <Geode/modify/PlayerObject.hpp>
 #include <Geode/modify/EndLevelLayer.hpp>
+#include <Geode/modify/CCScheduler.hpp>
 #include "bot.hpp"
 #include "UI/ImGui.hpp"
 #include "UI/Android.hpp"
@@ -155,6 +156,28 @@ class $modify(EndLevelLayer) {
 	void onMenu(CCObject* sender) {
 		EndLevelLayer::onMenu(sender);
 		uwuBot::catgirl->clearState();
+	}
+};
+
+class $modify(CCScheduler) {
+	void update(float dt) {
+		//Hopefully this doesnt crash :3
+		CCArray* nodes = CCDirector::sharedDirector()->getRunningScene()->getChildren();
+		CCObject* obj;
+		CCARRAY_FOREACH(nodes, obj) {
+			if (auto popup = dynamic_cast<MacroPopup*>(obj)) {
+				geode::log::debug("how?");
+				popup->refresh();
+				break;
+			}
+		}
+		//Other stuff
+		float dt2 = dt;
+		if (Mod::get()->getSettingValue<bool>("lock-delta")) {
+			dt2 = (1.f / 240.f); //Currently no way to change fps
+		}
+		dt2 *= static_cast<float>(Mod::get()->getSettingValue<double>("speedhack"));
+		CCScheduler::update(dt2);
 	}
 };
 

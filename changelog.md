@@ -1,3 +1,7 @@
+# v0.1.0-beta.3
+
+- ImGui partially working
+
 # v0.1.0-beta.2
 
 - Recording with checkpoints now works properly

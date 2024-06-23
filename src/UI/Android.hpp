@@ -39,4 +39,5 @@ public:
 	void keyBackClicked();
 	void toggleRecording(CCObject* p0);
 	void togglePlaying(CCObject* p0);
+	void refresh();
 };

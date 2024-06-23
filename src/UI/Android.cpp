@@ -105,7 +105,7 @@ void SaveMacroPopup::keyBackClicked() {
 }
 
 void SaveMacroPopup::saveMacro(CCObject* p0) {
-	BotFileError error = uwuBot::catgirl->saveMacro(m_macroNameInput->getString());
+	auto error = uwuBot::catgirl->saveMacro(m_macroNameInput->getString());
 
 	switch (error) {
 	case EmptyFileName:
@@ -322,4 +322,9 @@ void MacroPopup::toggleRecording(CCObject* p0) {
 void MacroPopup::togglePlaying(CCObject* p0) {
 	if (uwuBot::catgirl->m_state == state::recording) this->recordingToggle->toggle(false);
 	uwuBot::catgirl->m_state = (uwuBot::catgirl->m_state == state::playing) ? state::off : state::playing;
+}
+
+void MacroPopup::refresh() {
+	if (this->recordingToggle) this->recordingToggle->toggle(uwuBot::catgirl->m_state == state::recording);
+	if (this->playingToggle) this->playingToggle->toggle(uwuBot::catgirl->m_state == state::playing);
 }

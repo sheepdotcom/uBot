@@ -5,6 +5,11 @@
 
 class UwUGui {
 public:
+	//These are just so ImGui has something to toggle, they aren't the actual value, those are stored in bot.hpp
+	bool recording = false;
+	bool playing = false;
+	int nameCurrent = 0;
+
 	static UwUGui* get();
 	void setup();
 };
