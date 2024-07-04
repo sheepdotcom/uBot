@@ -1,5 +1,5 @@
 {
-	"geode": "3.0.0",
+	"geode": "3.1.1",
 	"gd": {
 		"win": "2.206"
 	},
@@ -8,24 +8,5 @@
 	"name": "uwuBot",
 	"developer": "sheepdotcom",
 	"description": "UwU",
-	"repository": "https://github.com/sheepdotcom/uwuBot",
-	"settings": {
-		"lock-delta": {
-			"name": "Lock Delta",
-			"description": "Makes sure no frames are skipped, which could cause issue for the bot.",
-			"type": "bool",
-			"default": true
-		},
-		"speedhack": {
-			"name": "Speedhack",
-			"description": "Slow down or speed up game :3",
-			"type": "float",
-			"default": 1,
-			"min": 0.01,
-			"max": 10,
-			"control": {
-				"slider": true
-			}
-		}
-	}
+	"repository": "https://github.com/sheepdotcom/uwuBot"
 }
