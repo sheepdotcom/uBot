@@ -171,13 +171,7 @@ class $modify(CCScheduler) {
 				break;
 			}
 		}
-		//Other stuff
-		float dt2 = dt;
-		if (Mod::get()->getSettingValue<bool>("lock-delta")) {
-			dt2 = (1.f / 240.f); //Currently no way to change fps
-		}
-		dt2 *= static_cast<float>(Mod::get()->getSettingValue<double>("speedhack"));
-		CCScheduler::update(dt2);
+		CCScheduler::update(dt);
 	}
 };
 
