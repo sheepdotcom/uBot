@@ -16,7 +16,6 @@ CCLabelBMFont* frameLabel = nullptr;
 class $modify(PlayerObject) {
 	void playerDestroyed(bool p0) {
 		PlayerObject::playerDestroyed(p0);
-		geode::log::debug("player destroyed");
 	}
 };
 
@@ -87,7 +86,6 @@ class $modify(PlayLayer) {
 				}
 			}
 		}
-		geode::log::debug("resetLevel");
 	}
 
 	void levelComplete() {
