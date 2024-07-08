@@ -47,8 +47,10 @@ void UwUGui::setup() {
 	if (ImGui::BeginPopupModal("Macro Saved", nullptr, flags)) {
 		const char* text = "Generic Error";
 		switch (error) {
+		case BotFileError::GenericError: text = "Generic Error"; break;
 		case BotFileError::UnableToOpenFile: text = "Macro failed to save."; break;
 		case BotFileError::EmptyFileName: text = "You must name your macro before saving."; break;
+		case BotFileError::InvalidFileName: text = "Invalid file name."; break;
 		case BotFileError::Success: text = "Macro saved."; break;
 		}
 		ImGui::Text(text);
@@ -61,6 +63,7 @@ void UwUGui::setup() {
 	if (ImGui::BeginPopupModal("Macro Loaded", nullptr, flags)) {
 		const char* text = "Generic Error";
 		switch (error) {
+		case BotFileError::GenericError: text = "Generic Error"; break;
 		case BotFileError::UnableToOpenFile: text = "Macro failed to load."; break;
 		case BotFileError::EmptyFileName: text = "You must enter a macro name to load."; break;
 		case BotFileError::InvalidFileName: text = "Macro does not exist."; break;

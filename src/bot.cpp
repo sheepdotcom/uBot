@@ -104,6 +104,8 @@ BotFileError uwuBot::loadMacro(std::string name) {
 	}
 
 	file.close();
+
+	return BotFileError::Success;
 }
 
 void uwuBot::clearState() {
