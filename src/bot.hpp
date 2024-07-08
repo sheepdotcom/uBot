@@ -23,6 +23,7 @@ enum state {
 
 //Might make things easier
 enum BotFileError {
+	GenericError,
 	Success,
 	EmptyFileName,
 	InvalidFileName,
@@ -39,10 +40,9 @@ public:
 	std::string m_gdVersion = "2.206";
 	int m_currentAction;
 
-	static uwuBot* get();
 	int getCurrentFrame();
 	void recordInput(bool isPlayer1, int button, int frame, bool holding, playerData playerData);
 	BotFileError saveMacro(std::string name);
+	BotFileError loadMacro(std::string name);
 	void clearState();
-	void reset();
 };

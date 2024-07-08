@@ -15,7 +15,6 @@ CCLabelBMFont* frameLabel = nullptr;
 
 class $modify(PlayerObject) {
 	void playerDestroyed(bool p0) {
-		uwuBot::catgirl->reset();
 		PlayerObject::playerDestroyed(p0);
 		geode::log::debug("player destroyed");
 	}
@@ -126,7 +125,7 @@ class $modify(GJBaseGameLayer) {
 			int frame = uwuBot::catgirl->getCurrentFrame();
 			if (!GJBaseGameLayer::get()->m_player1->m_isDead) {
 				while (uwuBot::catgirl->m_currentAction < static_cast<int>(uwuBot::catgirl->m_macroData.size()) && frame >= uwuBot::catgirl->m_macroData[uwuBot::catgirl->m_currentAction].frame && !this->m_player1->m_isDead) {
-					auto data = uwuBot::catgirl->m_macroData[uwuBot::catgirl->m_currentAction];
+					macroData data = uwuBot::catgirl->m_macroData[uwuBot::catgirl->m_currentAction];
 					
 					auto player = (data.isPlayer1) ? GJBaseGameLayer::get()->m_player1 : GJBaseGameLayer::get()->m_player2;
 					if (data.frame == frame) {
@@ -179,6 +178,8 @@ $on_mod(Loaded) {
 	uwuBot::catgirl = new uwuBot();
 	ImGuiCocos::get().setup([] {
 		//Post-setup stuff
+		//Theme setup goes here
+		ImGui::GetStyle().Colors[ImGuiCol_ModalWindowDimBg] = ImVec4(0.f, 0.f, 0.f, 0.2f);
 	}).draw([] {
 		UwUGui::get()->setup();
 	});

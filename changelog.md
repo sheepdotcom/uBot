@@ -1,3 +1,9 @@
+# v0.1.0-beta.4
+
+- Bot currently saves as json messagepack but I might code my own binary format
+- Added loading macros (ImGui Only im lazy)
+- Geode v3.2.0 :3
+
 # v0.1.0-beta.3
 
 - ImGui partially working

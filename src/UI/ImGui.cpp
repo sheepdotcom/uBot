@@ -20,8 +20,9 @@ void UwUGui::setup() {
 
 	static char buf[64];
 	if (ImGui::InputText("Name", buf, 64)) {
-		geode::log::debug("{}", buf);
+		//Basically buf is the text you have inputted
 	}
+	std::string macroName = buf;
 
 	if (ImGui::Checkbox("Record", &this->recording)) {
 		this->playing = false;
@@ -34,18 +35,43 @@ void UwUGui::setup() {
 	}
 
 	if (ImGui::Button("Save")) {
-		auto error = uwuBot::catgirl->saveMacro("test");
-		ImGui::OpenPopup("Alert", ImGuiPopupFlags_NoOpenOverExistingPopup|ImGuiPopupFlags_NoOpenOverItems);
+		error = uwuBot::catgirl->saveMacro(macroName); //Save macro and return an error if there was one
+		ImGui::OpenPopup("Macro Saved", ImGuiPopupFlags_NoOpenOverExistingPopup|ImGuiPopupFlags_NoOpenOverItems);
+	}
+	ImGui::SameLine();
+	if (ImGui::Button("Load")) {
+		error = uwuBot::catgirl->loadMacro(macroName); //Load macro and return an error if there was one
+		ImGui::OpenPopup("Macro Loaded", ImGuiPopupFlags_NoOpenOverExistingPopup|ImGuiPopupFlags_NoOpenOverItems);
 	}
 
-	ImGui::GetStyle().Colors[ImGuiCol_ModalWindowDimBg] = ImVec4(0.f,0.f,0.f,0.2f);
-	if (ImGui::BeginPopupModal("Alert", nullptr, flags)) {
+	if (ImGui::BeginPopupModal("Macro Saved", nullptr, flags)) {
+		const char* text = "Generic Error";
+		switch (error) {
+		case BotFileError::UnableToOpenFile: text = "Macro failed to save."; break;
+		case BotFileError::EmptyFileName: text = "You must name your macro before saving."; break;
+		case BotFileError::Success: text = "Macro saved."; break;
+		}
+		ImGui::Text(text);
 		if (ImGui::Button("Close", ImVec2(300.f,20.f))) {
 			ImGui::CloseCurrentPopup();
 		}
 		ImGui::EndPopup();
 	}
-	ImGui::SameLine();
+
+	if (ImGui::BeginPopupModal("Macro Loaded", nullptr, flags)) {
+		const char* text = "Generic Error";
+		switch (error) {
+		case BotFileError::UnableToOpenFile: text = "Macro failed to load."; break;
+		case BotFileError::EmptyFileName: text = "You must enter a macro name to load."; break;
+		case BotFileError::InvalidFileName: text = "Macro does not exist."; break;
+		case BotFileError::Success: text = "Macro loaded."; break;
+		}
+		ImGui::Text(text);
+		if (ImGui::Button("Close", ImVec2(300.f, 20.f))) {
+			ImGui::CloseCurrentPopup();
+		}
+		ImGui::EndPopup();
+	}
 
 	ImGui::End();
 }

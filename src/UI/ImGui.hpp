@@ -9,6 +9,7 @@ public:
 	bool recording = false;
 	bool playing = false;
 	int nameCurrent = 0;
+	BotFileError error;
 
 	static UwUGui* get();
 	void setup();
