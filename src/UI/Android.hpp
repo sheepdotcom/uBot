@@ -3,6 +3,17 @@
 #include <Geode/ui/TextInput.hpp>
 #include "../bot.hpp"
 
+class MacroCell : public CCNode {
+protected:
+	std::string m_macroName;
+	bool m_isLoad;
+
+	bool init(std::filesystem::path path, float width, float height, bool load);
+	void onClick(CCObject* p0);
+public:
+	static MacroCell* create(std::filesystem::path path, float width, float height, bool load);
+};
+
 class SaveMacroPopup : public CCLayerColor, public TextInputDelegate {
 protected:
 	TextInput* m_macroNameInput = nullptr;
@@ -18,6 +29,8 @@ public:
 
 class LoadMacroPopup : public CCLayerColor {
 protected:
+	TextInput* m_macroNameInput = nullptr;
+
 	bool init(float mWidth, float mHeight);
 	static LoadMacroPopup* create();
 public:

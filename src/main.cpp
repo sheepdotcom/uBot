@@ -11,8 +11,6 @@
 
 using namespace geode::prelude;
 
-CCLabelBMFont* frameLabel = nullptr;
-
 class $modify(PlayerObject) {
 	void playerDestroyed(bool p0) {
 		PlayerObject::playerDestroyed(p0);
@@ -49,14 +47,7 @@ class $modify(PlayLayer) {
 		auto winSize = CCDirector::sharedDirector()->getWinSize();
 		if (!PlayLayer::init(level, useReplay, dontCreateObjects)) return false;
 
-		frameLabel = CCLabelBMFont::create("Frame: 0", "bigFont.fnt");
-		frameLabel->setAnchorPoint(ccp(0.f, 1.f));
-		frameLabel->setPosition(ccp(0.f, winSize.height));
-		frameLabel->setID("frame-label");
-		frameLabel->setScale(0.5f);
-		frameLabel->setZOrder(128);
-
-		PlayLayer::get()->addChild(frameLabel);
+		uwuBot::catgirl->updateLabels();
 
 		return true;
 	}
@@ -64,10 +55,6 @@ class $modify(PlayLayer) {
 	void resetLevel() {
 		PlayLayer::resetLevel();
 		uwuBot::catgirl->m_currentAction = 0;
-		for (size_t player = 0; player < 2; player++) {
-			auto p = ((player == 0) ? this->m_player1 : this->m_player2);
-			p->releaseAllButtons();
-		}
 		if (uwuBot::catgirl->m_state == state::recording) {
 			if (this->m_isPracticeMode && uwuBot::catgirl->getCurrentFrame() >= 0) {
 				int frame = uwuBot::catgirl->getCurrentFrame();
@@ -78,6 +65,19 @@ class $modify(PlayLayer) {
 						}
 						else break;
 					}
+					if (uwuBot::catgirl->m_macroData.back().holding) {
+						//Add code to fix loading checkpoint where player was holding and hasnt released the button
+						for (size_t player = 0; player < 2; player++) {
+							auto p = (player == 0) ? this->m_player1 : this->m_player2;
+							if (p) {
+								GJBaseGameLayer::get()->handleButton(false, 1, (player == 0));
+								if (this->m_levelSettings->m_platformerMode) {
+									GJBaseGameLayer::get()->handleButton(false, 2, (player == 0));
+									GJBaseGameLayer::get()->handleButton(false, 3, (player == 0));
+								}
+							}
+						}
+					}
 				}
 			}
 			else {
@@ -86,6 +86,7 @@ class $modify(PlayLayer) {
 				}
 			}
 		}
+		uwuBot::catgirl->updateLabels();
 	}
 
 	void levelComplete() {
@@ -112,13 +113,14 @@ class $modify(GJBaseGameLayer) {
 	}
 
 	void update(float dt) {
-		if (frameLabel != nullptr) {
-			frameLabel->setString(fmt::format("Frame: {}", uwuBot::catgirl->getCurrentFrame()).c_str());
+		if (uwuBot::catgirl->frameLabel != nullptr) {
+			uwuBot::catgirl->frameLabel->setString(fmt::format("Frame: {}", uwuBot::catgirl->getCurrentFrame()).c_str());
 		}
 		GJBaseGameLayer::update(dt);
 	}
 
 	void processCommands(float p0) {
+		GJBaseGameLayer::processCommands(p0);
 		if (uwuBot::catgirl->m_state == state::playing) {
 			int frame = uwuBot::catgirl->getCurrentFrame();
 			if (!GJBaseGameLayer::get()->m_player1->m_isDead) {
@@ -139,8 +141,6 @@ class $modify(GJBaseGameLayer) {
 				}
 			}
 		}
-
-		GJBaseGameLayer::processCommands(p0);
 	}
 };
 
@@ -163,22 +163,25 @@ class $modify(CCScheduler) {
 		CCObject* obj;
 		CCARRAY_FOREACH(nodes, obj) {
 			if (auto popup = dynamic_cast<MacroPopup*>(obj)) {
-				geode::log::debug("how?");
 				popup->refresh();
 				break;
 			}
 		}
-		CCScheduler::update(dt);
+		auto dt2 = dt;
+		if (uwuBot::catgirl->m_state != state::off) {
+			dt2 = 1.f / 240.f;
+		}
+		CCScheduler::update(dt2);
 	}
 };
 
 $on_mod(Loaded) {
 	uwuBot::catgirl = new uwuBot();
-	ImGuiCocos::get().setup([] {
+	/*ImGuiCocos::get().setup([] {
 		//Post-setup stuff
 		//Theme setup goes here
 		ImGui::GetStyle().Colors[ImGuiCol_ModalWindowDimBg] = ImVec4(0.f, 0.f, 0.f, 0.2f);
 	}).draw([] {
 		UwUGui::get()->setup();
-	});
+	});*/
 }

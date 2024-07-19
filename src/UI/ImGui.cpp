@@ -1,4 +1,5 @@
 #include "ImGui.hpp"
+#include <imgui_internal.h>
 
 using namespace geode::prelude;
 

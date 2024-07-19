@@ -34,6 +34,9 @@ class uwuBot {
 public:
 	static inline uwuBot* catgirl = nullptr;
 
+	CCLabelBMFont* frameLabel = nullptr;
+	CCLabelBMFont* stateLabel = nullptr;
+
 	state m_state = off;
 	std::vector<macroData> m_macroData;
 	std::string m_formatVersion = "1"; //Version of the format, most likely older versions of the mod either wont accept newer formats or may give a popup warning about trying to parse a newer version, while newer versions may accept older format versions.
@@ -45,4 +48,5 @@ public:
 	BotFileError saveMacro(std::string name);
 	BotFileError loadMacro(std::string name);
 	void clearState();
+	void updateLabels();
 };
