@@ -1,3 +1,7 @@
+# v0.2.1-beta
+
+- Added frame fix
+
 # v0.2.0-beta
 
 - Disabled the ImGui menu for now

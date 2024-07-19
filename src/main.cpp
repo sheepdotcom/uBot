@@ -129,11 +129,9 @@ class $modify(GJBaseGameLayer) {
 					
 					auto player = (data.isPlayer1) ? GJBaseGameLayer::get()->m_player1 : GJBaseGameLayer::get()->m_player2;
 					if (data.frame == frame) {
-						if (data.holding) {
-							player->pushButton(static_cast<PlayerButton>(data.button));
-						}
-						else {
-							player->releaseButton(static_cast<PlayerButton>(data.button));
+						this->handleButton(data.holding, data.button, data.isPlayer1);
+						if (data.pData.xPos != 0 && data.pData.yPos != 0) {
+							player->setPosition(ccp(data.pData.xPos, data.pData.yPos));
 						}
 					}
 
