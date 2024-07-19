@@ -24,7 +24,6 @@ void loadMacro(std::string name) {
 
 void MacroCell::onClick(CCObject* p0) {
 	if (auto cell = static_cast<MacroCell*>(static_cast<CCNode*>(p0)->getUserData())) {
-		geode::log::debug("button {}", cell->m_macroName);
 		if (cell->m_isLoad) {
 			geode::createQuickPopup("Load Macro",
 				fmt::format("Do you want to load \"{}\"?\nThis will clear the current macro.", cell->m_macroName),
@@ -93,8 +92,6 @@ void refreshMacroList(ScrollLayer* scroll, bool load) {
 		if (std::filesystem::is_regular_file(macro)) {
 			auto name = macro.path().filename().string();
 			if (name.ends_with(".uwu")) {
-				geode::log::debug("macro found: {}", name);
-
 				//Lots of math so nothing is really hardcoded.
 				auto edgeDist = 10.f; //Distance away from the edge of the scroll layer.
 				auto gapDist = 10.f; //Distance between each macro cell.
@@ -210,6 +207,9 @@ void SaveMacroPopup::saveMacro(CCObject* p0) {
 	auto error = uwuBot::catgirl->saveMacro(m_macroNameInput->getString());
 
 	switch (error) {
+	case GenericError:
+		FLAlertLayer::create("Save Macro", "Generic Error", "OK")->show();
+		break;
 	case EmptyFileName:
 		FLAlertLayer::create("Save Macro", "You must type in a macro name!", "OK")->show();
 		break;

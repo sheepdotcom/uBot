@@ -1,4 +1,4 @@
-#include "ImGui.hpp"
+/*#include "ImGui.hpp"
 #include <imgui_internal.h>
 
 using namespace geode::prelude;
@@ -78,4 +78,4 @@ void UwUGui::setup() {
 	}
 
 	ImGui::End();
-}
+}*/

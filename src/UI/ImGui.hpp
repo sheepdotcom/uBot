@@ -1,4 +1,4 @@
-#pragma once
+/*#pragma once
 
 #include <imgui-cocos.hpp>
 #include "../bot.hpp"
@@ -13,4 +13,4 @@ public:
 
 	static UwUGui* get();
 	void setup();
-};
+};*/

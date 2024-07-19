@@ -1,17 +1,14 @@
-# v0.2.1-beta
-
-- Added frame fix
-
 # v0.2.0-beta
 
 - Disabled the ImGui menu for now
-- Removed more logs
+- Removed logs
 - Updated the Android UI and added saving and loading
 - Moved macros into a macros folder
 - Fixed macros being saved incorrectly
 - Added lock delta whenever recording or replaying
 - Added a label showing if you are recording or replaying
 - Both labels now only show if you are recording or replaying
+- Added frame fix
 
 # v0.1.0-beta.4
 
