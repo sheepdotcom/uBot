@@ -1,6 +1,7 @@
 #pragma once
 
 #include <Geode/ui/TextInput.hpp>
+#include <Geode/ui/GeodeUI.hpp>
 #include "../bot.hpp"
 
 class MacroCell : public CCNode {
@@ -52,5 +53,6 @@ public:
 	void keyBackClicked();
 	void toggleRecording(CCObject* p0);
 	void togglePlaying(CCObject* p0);
+	void openSettings(CCObject* p0);
 	void refresh();
 };

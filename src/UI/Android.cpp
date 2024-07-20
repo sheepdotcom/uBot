@@ -395,6 +395,13 @@ bool MacroPopup::init(float mWidth, float mHeight) {
 	loadButton->setID("load-button");
 	menu->addChild(loadButton);
 
+	auto settingsSpr = CCSprite::createWithSpriteFrameName("GJ_optionsBtn_001.png");
+	settingsSpr->setScale(0.7f);
+	auto settingsBtn = CCMenuItemSpriteExtra::create(settingsSpr, this, menu_selector(MacroPopup::openSettings));
+	settingsBtn->setPosition(ccp((winSize.width / 2) + (mWidth / 2) - 25.f, (winSize.height / 2) - (mHeight / 2) + 25.f));
+	settingsBtn->setID("settings-button");
+	menu->addChild(settingsBtn);
+
 	handleTouchPriority(this);
 	this->setTouchEnabled(true);
 	this->setKeypadEnabled(true);
@@ -441,6 +448,10 @@ void MacroPopup::togglePlaying(CCObject* p0) {
 	if (uwuBot::catgirl->m_state == state::recording) this->recordingToggle->toggle(false);
 	uwuBot::catgirl->m_state = (uwuBot::catgirl->m_state == state::playing) ? state::off : state::playing;
 	uwuBot::catgirl->updateLabels();
+}
+
+void MacroPopup::openSettings(CCObject* p0) {
+	geode::openSettingsPopup(Mod::get());
 }
 
 void MacroPopup::refresh() {

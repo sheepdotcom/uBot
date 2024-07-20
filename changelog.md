@@ -1,3 +1,8 @@
+# v0.2.1-beta
+
+- Added settings for speedhack and lock delta
+- Added a button to open the mod settings
+
 # v0.2.0-beta
 
 - Disabled the ImGui menu for now

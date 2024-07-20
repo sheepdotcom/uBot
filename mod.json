@@ -9,5 +9,36 @@
 	"name": "uwuBot",
 	"developer": "sheepdotcom",
 	"description": "UwU",
-	"repository": "https://github.com/sheepdotcom/uwuBot"
+	"repository": "https://github.com/sheepdotcom/uwuBot",
+	"settings": {
+		"enable-speedhack": {
+			"name": "Enable Speedhack",
+			"description": "Enable speedhack, only works while recording or replaying",
+			"type": "bool",
+			"default": false
+		},
+		"speedhack": {
+			"name": "Speedhack",
+			"description": "Change the speed the game runs at",
+			"type": "float",
+			"default": 1,
+			"min": 0.01,
+			"max": 2,
+			"control": {
+				"slider": true
+			}
+		},
+		"speedhack-audio": {
+			"name": "Speedhack Audio",
+			"description": "Change the speed of the audio to match the game",
+			"type": "bool",
+			"default": true
+		},
+		"lock-delta": {
+			"name": "Lock Delta",
+			"description": "Makes sure frames don't get skipped, only works while recording or replaying",
+			"type": "bool",
+			"default": true
+		}
+	}
 }
