@@ -175,12 +175,15 @@ class $modify(CCScheduler) {
 			ss << std::fixed << std::setprecision(2) << static_cast<float>(Mod::get()->getSettingValue<double>("speedhack"));
 			float speed = std::stof(ss.str());
 
+			FMOD::ChannelGroup* channel;
+			FMODAudioEngine::sharedEngine()->m_system->getMasterChannelGroup(&channel);
+			channel->setPitch(1.f);
+
 			if (Mod::get()->getSettingValue<bool>("enable-speedhack")) {
 				dt2 *= speed;
 
 				if (Mod::get()->getSettingValue<bool>("speedhack-audio")) {
-					FMOD::ChannelGroup* channel;
-					FMODAudioEngine::sharedEngine()->m_system->getMasterChannelGroup(&channel);
+					
 					channel->setPitch(speed);
 				}
 			}
