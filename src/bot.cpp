@@ -59,7 +59,7 @@ BotFileError uwuBot::saveMacro(std::string name) {
 			input["pos_x"] = frame.pData.xPos;
 			input["pos_y"] = frame.pData.yPos;
 		}
-		if (uwuBot::catgirl->m_infoData.xVelFix) input["vel_x"] = frame.pData.xVel;
+		if (uwuBot::catgirl->m_infoData.xVelFix && uwuBot::catgirl->m_infoData.platformer) input["vel_x"] = frame.pData.xVel;
 		if (uwuBot::catgirl->m_infoData.yVelFix) input["vel_y"] = frame.pData.yVel;
 
 		json["inputs"].push_back(input);
