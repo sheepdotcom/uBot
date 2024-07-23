@@ -1,6 +1,6 @@
 # v0.2.2-beta
 
-- Changed mod name from uBot to uBot
+- Changed mod name from uwuBot to uBot
 - Updated frame fix and added a setting for it
 - Updated macro format, should be compatible with previous ones
 
