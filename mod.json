@@ -39,6 +39,12 @@
 			"description": "Makes sure frames don't get skipped, only works while recording or replaying",
 			"type": "bool",
 			"default": true
+		},
+		"frame-fix": {
+			"name": "Frame Fix",
+			"description": "Makes the macro more accurate but increases the file size, only applies when recording.",
+			"type": "bool",
+			"default": true
 		}
 	}
 }

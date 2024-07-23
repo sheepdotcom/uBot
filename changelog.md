@@ -1,3 +1,8 @@
+# v0.2.2-beta
+
+- Updated frame fix and added a setting for it
+- Updated macro format, should be compatible with previous ones
+
 # v0.2.1-beta
 
 - Added settings for speedhack and lock delta

@@ -101,11 +101,18 @@ class $modify(GJBaseGameLayer) {
 		if (uwuBot::catgirl->m_state == state::recording) {
 			playerData pData;
 			auto player = (player1) ? this->m_player1 : this->m_player2; //Saves some code :3
-			pData = {
-				player->getPositionX(),
-				player->getPositionY()
-			};
+			auto isFrameFix = Mod::get()->getSettingValue<bool>("frame-fix");
+			if (isFrameFix) {
+				pData = {
+					player->getPositionX(),
+					player->getPositionY(),
+					player->m_platformerXVelocity,
+					player->m_yVelocity
+				};
+			}
+			else pData = {0.f, 0.f, 0.0, 0.0}; //No data :3
 			uwuBot::catgirl->recordInput(player1, button, uwuBot::catgirl->getCurrentFrame(), holding, pData);
+			uwuBot::catgirl->updateInfo(isFrameFix, isFrameFix, isFrameFix, this->m_isPlatformer);
 		}
 		else if (uwuBot::catgirl->m_state == state::playing) {
 			
@@ -130,9 +137,13 @@ class $modify(GJBaseGameLayer) {
 					auto player = (data.isPlayer1) ? GJBaseGameLayer::get()->m_player1 : GJBaseGameLayer::get()->m_player2;
 					if (data.frame == frame) {
 						this->handleButton(data.holding, data.button, data.isPlayer1);
-						if (data.pData.xPos != 0 && data.pData.yPos != 0) {
+
+						if (uwuBot::catgirl->m_infoData.posFix && data.pData.xPos != 0 && data.pData.yPos != 0)
 							player->setPosition(ccp(data.pData.xPos, data.pData.yPos));
-						}
+						if (uwuBot::catgirl->m_infoData.xVelFix && uwuBot::catgirl->m_infoData.platformer && data.pData.xVel != 0)
+							player->m_platformerXVelocity = data.pData.xVel;
+						if (uwuBot::catgirl->m_infoData.yVelFix && data.pData.yVel != 0)
+							player->m_yVelocity = data.pData.yVel;
 					}
 
 					uwuBot::catgirl->m_currentAction++;

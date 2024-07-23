@@ -10,6 +10,7 @@ void loadMacro(std::string name) {
 	case BotFileError::UnableToOpenFile: text = "Macro failed to load."; break;
 	case BotFileError::EmptyFileName: text = "You must enter a macro name to load."; break;
 	case BotFileError::InvalidFileName: text = "Macro does not exist."; break;
+	case BotFileError::OlderVersion: text = "Older version of macro"; break;
 	case BotFileError::Success: text = "Macro loaded."; break;
 	}
 	if (error != BotFileError::Success) {

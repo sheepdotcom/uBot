@@ -12,7 +12,14 @@ int uwuBot::getCurrentFrame() {
 }
 
 void uwuBot::recordInput(bool isPlayer1, int button, int frame, bool holding, playerData playerData) {
-	catgirl->m_macroData.push_back({isPlayer1, button, frame, holding, playerData});
+	uwuBot::catgirl->m_macroData.push_back({isPlayer1, button, frame, holding, playerData});
+}
+
+void uwuBot::updateInfo(bool posFix, bool yVelFix, bool xVelFix, bool platformer) {
+	uwuBot::catgirl->m_infoData.posFix = posFix;
+	uwuBot::catgirl->m_infoData.yVelFix = yVelFix;
+	uwuBot::catgirl->m_infoData.xVelFix = xVelFix;
+	uwuBot::catgirl->m_infoData.platformer = platformer;
 }
 
 BotFileError uwuBot::saveMacro(std::string name) {
@@ -29,8 +36,12 @@ BotFileError uwuBot::saveMacro(std::string name) {
 
 	json["bot"] = {
 		{"name", "uwuBot"},
-		{"version", "1"}
+		{"version", "2"}
 	};
+	json["data"]["posFix"] = uwuBot::catgirl->m_infoData.posFix;
+	json["data"]["yVelFix"] = uwuBot::catgirl->m_infoData.yVelFix;
+	json["data"]["xVelFix"] = uwuBot::catgirl->m_infoData.xVelFix;
+	json["data"]["plat"] = uwuBot::catgirl->m_infoData.platformer;
 	json["duration"] = uwuBot::catgirl->m_macroData.back().frame;
 	json["gameVersion"] = uwuBot::catgirl->m_gdVersion; //Lets use a string instead :3
 	json["seed"] = 0; //Add later
@@ -44,8 +55,12 @@ BotFileError uwuBot::saveMacro(std::string name) {
 		input["down"] = frame.holding;
 		input["isP1"] = frame.isPlayer1;
 
-		input["pos_x"] = frame.pData.xPos;
-		input["pos_y"] = frame.pData.yPos;
+		if (uwuBot::catgirl->m_infoData.posFix) {
+			input["pos_x"] = frame.pData.xPos;
+			input["pos_y"] = frame.pData.yPos;
+		}
+		if (uwuBot::catgirl->m_infoData.xVelFix) input["vel_x"] = frame.pData.xVel;
+		if (uwuBot::catgirl->m_infoData.yVelFix) input["vel_y"] = frame.pData.yVel;
 
 		json["inputs"].push_back(input);
 	}
@@ -98,6 +113,17 @@ BotFileError uwuBot::loadMacro(std::string name) {
 	if (!uwuBot::catgirl->m_macroData.empty()) {
 		uwuBot::catgirl->m_macroData.clear();
 	}
+	
+	//Check if it exists (older versions do not have this)
+	if (json.contains("data")) {
+		uwuBot::catgirl->m_infoData = {
+			json["data"]["posFix"],
+			json["data"]["yVelFix"],
+			json["data"]["xVelFix"],
+			json["data"]["platformer"]
+		};
+	}
+	else uwuBot::catgirl->m_infoData = {true, false, false, false}; //Fallback for backwards compatibility (pos fix existed in v1)
 
 	nlohmann::json inputs = json["inputs"];
 	for (auto& input : inputs) {
@@ -106,10 +132,16 @@ BotFileError uwuBot::loadMacro(std::string name) {
 		auto holding = input["down"].get<bool>();
 		auto isPlayer1 = input["isP1"].get<bool>();
 
-		auto xPos = input["pos_x"].get<float>();
-		auto yPos = input["pos_y"].get<float>();
+		float xPos = 0.f;
+		float yPos = 0.f;
+		double xVel = 0.0;
+		double yVel = 0.0;
+		if (input.contains("pos_x")) xPos = input["pos_x"].get<float>();
+		if (input.contains("pos_y")) yPos = input["pos_y"].get<float>();
+		if (input.contains("vel_x")) xVel = input["vel_x"].get<double>();
+		if (input.contains("vel_y")) yVel = input["vel_y"].get<double>();
 
-		uwuBot::catgirl->recordInput(isPlayer1, button, frame, holding, {xPos, yPos});
+		uwuBot::catgirl->recordInput(isPlayer1, button, frame, holding, {xPos, yPos, xVel, yVel});
 	}
 
 	return BotFileError::Success;
