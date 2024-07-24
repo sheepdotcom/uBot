@@ -40,11 +40,17 @@
 			"type": "bool",
 			"default": true
 		},
-		"frame-fix": {
-			"name": "Frame Fix",
-			"description": "Makes the macro more accurate but increases the file size, only applies when recording.",
+		"practice-fix": {
+			"name": "Practice Bug Fix",
+			"description": "Fixes checkpoints not properly saving and loading player data and inturn creating small inaccuracies",
 			"type": "bool",
 			"default": true
+		},
+		"frame-fix": {
+			"name": "Frame Fix",
+			"description": "Makes the macro more accurate but increases the file size, only applies when recording. Not needed anymore since practice bug fix fixes the innacuracies.",
+			"type": "bool",
+			"default": false
 		}
 	}
 }

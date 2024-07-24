@@ -1,3 +1,8 @@
+# v0.2.3-beta
+
+- Added practice fix
+- Frame fix is now disabled by default
+
 # v0.2.2-beta
 
 - Changed mod name from uwuBot to uBot

@@ -1,15 +1,80 @@
 #include <Geode/Geode.hpp>
 #include <Geode/modify/PlayLayer.hpp>
-#include <Geode/modify/GJBaseGameLayer.hpp>
 #include <Geode/modify/PauseLayer.hpp>
-#include <Geode/modify/PlayerObject.hpp>
-#include <Geode/modify/EndLevelLayer.hpp>
+#include <Geode/modify/GJBaseGameLayer.hpp>
 #include <Geode/modify/CCScheduler.hpp>
+#include <Geode/modify/EndLevelLayer.hpp>
+#include <Geode/modify/CheckpointObject.hpp>
+#include <Geode/modify/PlayerObject.hpp>
 #include "bot.hpp"
-#include "UI/ImGui.hpp"
 #include "UI/Android.hpp"
+#include "UI/ImGui.hpp"
 
 using namespace geode::prelude;
+
+class $modify(CatgirlsPlay, PlayLayer) {
+	struct Fields {
+		std::unordered_map<CheckpointObject*, CheckpointSave> m_checkpoints;
+	};
+
+	bool init(GJGameLevel * level, bool useReplay, bool dontCreateObjects) {
+		auto winSize = CCDirector::sharedDirector()->getWinSize();
+		if (!PlayLayer::init(level, useReplay, dontCreateObjects)) return false;
+
+		uwuBot::catgirl->updateLabels();
+
+		return true;
+	}
+
+	void resetLevel() {
+		if (m_checkpointArray->count() <= 0) m_fields->m_checkpoints.clear();
+
+		PlayLayer::resetLevel();
+		uwuBot::catgirl->updateLabels();
+
+		if (m_checkpointArray->count() > 0) return;
+		uwuBot::catgirl->m_currentAction = 0;
+
+		if (uwuBot::catgirl->m_state != state::recording) return;
+		if (!uwuBot::catgirl->m_macroData.empty()) uwuBot::catgirl->m_macroData.clear();
+	}
+
+	void loadFromCheckpoint(CheckpointObject* checkpoint) {
+		CatgirlsPlay* catgirlsPlay = static_cast<CatgirlsPlay*>(CatgirlsPlay::get());
+
+		PlayLayer::loadFromCheckpoint(checkpoint);
+		if (Mod::get()->getSettingValue<bool>("practice-fix") && catgirlsPlay->m_fields->m_checkpoints.contains(checkpoint)) {
+			CheckpointSave& save = catgirlsPlay->m_fields->m_checkpoints[checkpoint];
+			save.apply(catgirlsPlay->m_player1, catgirlsPlay->m_gameState.m_isDualMode ? catgirlsPlay->m_player2 : nullptr);
+		}
+
+		uwuBot::catgirl->clearInputsAfterFrame(uwuBot::catgirl->getCurrentFrame());
+	}
+
+	void onQuit() {
+		m_fields->m_checkpoints.clear();
+		PlayLayer::onQuit();
+	}
+
+	void levelComplete() {
+		PlayLayer::levelComplete();
+		uwuBot::catgirl->clearState();
+	}
+};
+
+class $modify(CheckpointObject) {
+	bool init() {
+		auto res = CheckpointObject::init();
+		if (Mod::get()->getSettingValue<bool>("practice-fix")) {
+			CatgirlsPlay* catgirlsPlay = static_cast<CatgirlsPlay*>(CatgirlsPlay::get());
+			if (uwuBot::catgirl->getCurrentFrame() > 0) {
+				CheckpointSave save(catgirlsPlay->m_player1, catgirlsPlay->m_gameState.m_isDualMode ? catgirlsPlay->m_player2 : nullptr);
+				catgirlsPlay->m_fields->m_checkpoints[this] = save;
+			}
+		}
+		return res;
+	}
+};
 
 class $modify(PlayerObject) {
 	void playerDestroyed(bool p0) {
@@ -31,66 +96,13 @@ class $modify(PauseLayer) {
 		rightMenu->updateLayout();
 	}
 
-	void onQuit(CCObject* sender) {
+	void onQuit(CCObject * sender) {
 		PauseLayer::onQuit(sender);
 		uwuBot::catgirl->clearState();
 	}
 
 	void goEdit() {
 		PauseLayer::goEdit();
-		uwuBot::catgirl->clearState();
-	}
-};
-
-class $modify(PlayLayer) {
-	bool init(GJGameLevel* level, bool useReplay, bool dontCreateObjects) {
-		auto winSize = CCDirector::sharedDirector()->getWinSize();
-		if (!PlayLayer::init(level, useReplay, dontCreateObjects)) return false;
-
-		uwuBot::catgirl->updateLabels();
-
-		return true;
-	}
-
-	void resetLevel() {
-		PlayLayer::resetLevel();
-		uwuBot::catgirl->m_currentAction = 0;
-		if (uwuBot::catgirl->m_state == state::recording) {
-			if (this->m_isPracticeMode && uwuBot::catgirl->getCurrentFrame() >= 0) {
-				int frame = uwuBot::catgirl->getCurrentFrame();
-				if (!uwuBot::catgirl->m_macroData.empty()) {
-					for (int i = uwuBot::catgirl->m_macroData.size() - 1; i >= 0; i--) { //reverse iterator seems wierd so im using this
-						if (uwuBot::catgirl->m_macroData[i].frame >= frame) {
-							uwuBot::catgirl->m_macroData.erase(uwuBot::catgirl->m_macroData.begin() + i);
-						}
-						else break;
-					}
-					if (uwuBot::catgirl->m_macroData.back().holding) {
-						//Add code to fix loading checkpoint where player was holding and hasnt released the button
-						for (size_t player = 0; player < 2; player++) {
-							auto p = (player == 0) ? this->m_player1 : this->m_player2;
-							if (p) {
-								GJBaseGameLayer::get()->handleButton(false, 1, (player == 0));
-								if (this->m_levelSettings->m_platformerMode) {
-									GJBaseGameLayer::get()->handleButton(false, 2, (player == 0));
-									GJBaseGameLayer::get()->handleButton(false, 3, (player == 0));
-								}
-							}
-						}
-					}
-				}
-			}
-			else {
-				if (!uwuBot::catgirl->m_macroData.empty()) {
-					uwuBot::catgirl->m_macroData.clear();
-				}
-			}
-		}
-		uwuBot::catgirl->updateLabels();
-	}
-
-	void levelComplete() {
-		PlayLayer::levelComplete();
 		uwuBot::catgirl->clearState();
 	}
 };
@@ -110,12 +122,12 @@ class $modify(GJBaseGameLayer) {
 					player->m_yVelocity
 				};
 			}
-			else pData = {0.f, 0.f, 0.0, 0.0}; //No data :3
+			else pData = { 0.f, 0.f, 0.0, 0.0 }; //No data :3
 			uwuBot::catgirl->recordInput(player1, button, uwuBot::catgirl->getCurrentFrame(), holding, pData);
 			uwuBot::catgirl->updateInfo(isFrameFix, isFrameFix, isFrameFix, this->m_isPlatformer);
 		}
 		else if (uwuBot::catgirl->m_state == state::playing) {
-			
+
 		}
 	}
 
@@ -133,7 +145,7 @@ class $modify(GJBaseGameLayer) {
 			if (!GJBaseGameLayer::get()->m_player1->m_isDead) {
 				while (uwuBot::catgirl->m_currentAction < static_cast<int>(uwuBot::catgirl->m_macroData.size()) && frame >= uwuBot::catgirl->m_macroData[uwuBot::catgirl->m_currentAction].frame && !this->m_player1->m_isDead) {
 					macroData data = uwuBot::catgirl->m_macroData[uwuBot::catgirl->m_currentAction];
-					
+
 					auto player = (data.isPlayer1) ? GJBaseGameLayer::get()->m_player1 : GJBaseGameLayer::get()->m_player2;
 					if (data.frame == frame) {
 						this->handleButton(data.holding, data.button, data.isPlayer1);
@@ -159,7 +171,7 @@ class $modify(EndLevelLayer) {
 		uwuBot::catgirl->clearState();
 	}
 
-	void onMenu(CCObject* sender) {
+	void onMenu(CCObject * sender) {
 		EndLevelLayer::onMenu(sender);
 		uwuBot::catgirl->clearState();
 	}
@@ -194,7 +206,7 @@ class $modify(CCScheduler) {
 				dt2 *= speed;
 
 				if (Mod::get()->getSettingValue<bool>("speedhack-audio")) {
-					
+
 					channel->setPitch(speed);
 				}
 			}
