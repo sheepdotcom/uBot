@@ -2,6 +2,8 @@
 
 - Added practice fix
 - Frame fix is now disabled by default
+- Fixed an issue where the game would crash when opening the save/load menu
+- Fixed issues with speedhack audio not changing the audio back to normal speed.
 
 # v0.2.2-beta
 

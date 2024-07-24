@@ -189,28 +189,30 @@ class $modify(CCScheduler) {
 			}
 		}
 		auto dt2 = dt;
+		float audioSpeed = 1.f;
 		if (uwuBot::catgirl->m_state != state::off) {
 			if (Mod::get()->getSettingValue<bool>("lock-delta")) {
 				dt2 = 1.f / 240.f;
+			}
+
+			if (CCScheduler::get()->getTimeScale() != 1.f) {
+				geode::log::debug("{}", CCScheduler::get()->getTimeScale());
 			}
 
 			std::stringstream ss;
 			ss << std::fixed << std::setprecision(2) << static_cast<float>(Mod::get()->getSettingValue<double>("speedhack"));
 			float speed = std::stof(ss.str());
 
-			FMOD::ChannelGroup* channel;
-			FMODAudioEngine::sharedEngine()->m_system->getMasterChannelGroup(&channel);
-			channel->setPitch(1.f);
-
 			if (Mod::get()->getSettingValue<bool>("enable-speedhack")) {
 				dt2 *= speed;
-
 				if (Mod::get()->getSettingValue<bool>("speedhack-audio")) {
-
-					channel->setPitch(speed);
+					audioSpeed *= speed;
 				}
 			}
 		}
+		FMOD::ChannelGroup* channel;
+		FMODAudioEngine::sharedEngine()->m_system->getMasterChannelGroup(&channel);
+		channel->setPitch(audioSpeed);
 		CCScheduler::update(dt2);
 	}
 };

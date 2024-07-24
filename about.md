@@ -14,6 +14,7 @@ A list of features that are to be added in the future. <cr>Red</c> means it hasn
 - <cg>Practice Bug Fix</c>
 - <cr>Show Trajectory</c>
 - <cr>Show Hitboxes</c>
+- <cr>Menu Redesign</c>
 - <cr>Disable checkpoints (for platformer)</c>
 - <cr>Internal Recorder</c>
 - <cr>Converting macros from one type to another</c>

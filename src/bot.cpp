@@ -65,9 +65,7 @@ BotFileError uwuBot::saveMacro(std::string name) {
 	if (name.empty()) return BotFileError::EmptyFileName;
 
 	std::string saveLoc = Mod::get()->getSaveDir().string();
-	if (!std::filesystem::exists(saveLoc + "/macros")) {
-		std::filesystem::create_directory(saveLoc + "/macros");
-	}
+	if (!std::filesystem::exists(saveLoc + "/macros")) std::filesystem::create_directory(saveLoc + "/macros");
 	saveLoc = saveLoc + "/macros/" + name + ".uwu"; //We love UwU files hehe
 
 	//Similar format to gdr but we store less (since we can infer details when i add the export as different file type feature)
@@ -123,8 +121,9 @@ BotFileError uwuBot::loadMacro(std::string name) {
 	if (name.empty()) return BotFileError::EmptyFileName;
 
 	std::string saveLoc = Mod::get()->getSaveDir().string();
+	if (!std::filesystem::exists(saveLoc + "/macros")) std::filesystem::create_directory(saveLoc + "/macros");
 	saveLoc = saveLoc + "/macros/" + name + ".uwu"; //We love UwU files hehe
-	
+
 	if (!std::filesystem::exists(saveLoc)) {
 		return BotFileError::InvalidFileName;
 	}
@@ -335,8 +334,13 @@ PlayerSaveObject::PlayerSaveObject(PlayerObject* player) {
 
 	m_objectSnappedTo = player->m_objectSnappedTo;
 
+#ifndef GEODE_IS_ANDROID
 	m_unk6a4 = player->m_unk6a4;
 	m_unk828 = player->m_unk828;
+#else
+	std::copy(std::begin(player->m_unk6a4), std::end(player->m_unk6a4), std::begin(m_unk6a4));
+	std::copy(std::begin(player->m_unk828), std::end(player->m_unk828), std::begin(m_unk828));
+#endif
 	m_unk880 = player->m_unk880;
 	m_unk910 = player->m_unk910;
 	m_unk924 = player->m_unk924;
@@ -458,8 +462,13 @@ void PlayerSaveObject::apply(PlayerObject* player) {
 
 	player->m_objectSnappedTo = m_objectSnappedTo;
 
+#ifndef GEODE_IS_ANDROID
 	player->m_unk6a4 = m_unk6a4;
 	player->m_unk828 = m_unk828;
+#else
+	std::copy(std::begin(m_unk6a4), std::end(m_unk6a4), std::begin(player->m_unk6a4));
+	std::copy(std::begin(m_unk828), std::end(m_unk828), std::begin(player->m_unk828));
+#endif
 	player->m_unk880 = m_unk880;
 	player->m_unk910 = m_unk910;
 	player->m_unk924 = m_unk924;

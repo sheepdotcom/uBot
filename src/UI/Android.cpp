@@ -89,6 +89,8 @@ MacroCell* MacroCell::create(std::filesystem::path path, float width, float heig
 void refreshMacroList(ScrollLayer* scroll, bool load) {
 	size_t i = 0;
 	auto dir = (Mod::get()->getSaveDir().string() + "/macros");
+	if (!std::filesystem::exists(dir)) std::filesystem::create_directory(dir);
+
 	for (auto& macro : std::filesystem::directory_iterator(std::filesystem::u8path(dir))) {
 		if (std::filesystem::is_regular_file(macro)) {
 			auto name = macro.path().filename().string();
