@@ -1,3 +1,7 @@
+# v0.2.4-beta
+
+- Fixed some issues with replaying while in practice mode
+
 # v0.2.3-beta
 
 - Added practice fix

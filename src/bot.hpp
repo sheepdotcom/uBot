@@ -112,7 +112,6 @@ private:
 	float m_unk68c;
 	bool m_gv0096; // = GameManager::getGameVariable("0096")
 	bool m_gv0100; // = GameManager::getGameVariable("0100")
-	int m_unk6c0;
 	float m_unk70c;
 	float m_unk710;
 	int m_playerStreak;

@@ -48,6 +48,17 @@ class $modify(CatgirlsPlay, PlayLayer) {
 			save.apply(catgirlsPlay->m_player1, catgirlsPlay->m_gameState.m_isDualMode ? catgirlsPlay->m_player2 : nullptr);
 		}
 
+		auto frame = uwuBot::catgirl->getCurrentFrame();
+		if (uwuBot::catgirl->m_state == state::playing) {
+			auto nya = std::min(static_cast<int>(uwuBot::catgirl->m_macroData.size() - 1), uwuBot::catgirl->m_currentAction);
+			for (int i = nya; i >= 0; i--) {
+				if (uwuBot::catgirl->m_macroData[i].frame < frame) {
+					uwuBot::catgirl->m_currentAction = i;
+					break;
+				}
+			}
+		}
+
 		uwuBot::catgirl->clearInputsAfterFrame(uwuBot::catgirl->getCurrentFrame());
 	}
 
@@ -142,24 +153,22 @@ class $modify(GJBaseGameLayer) {
 		GJBaseGameLayer::processCommands(p0);
 		if (uwuBot::catgirl->m_state == state::playing) {
 			int frame = uwuBot::catgirl->getCurrentFrame();
-			if (!GJBaseGameLayer::get()->m_player1->m_isDead) {
-				while (uwuBot::catgirl->m_currentAction < static_cast<int>(uwuBot::catgirl->m_macroData.size()) && frame >= uwuBot::catgirl->m_macroData[uwuBot::catgirl->m_currentAction].frame && !this->m_player1->m_isDead) {
-					macroData data = uwuBot::catgirl->m_macroData[uwuBot::catgirl->m_currentAction];
+			while (uwuBot::catgirl->m_currentAction < static_cast<int>(uwuBot::catgirl->m_macroData.size()) && frame >= uwuBot::catgirl->m_macroData[uwuBot::catgirl->m_currentAction].frame && !this->m_player1->m_isDead) {
+				macroData data = uwuBot::catgirl->m_macroData[uwuBot::catgirl->m_currentAction];
 
-					auto player = (data.isPlayer1) ? GJBaseGameLayer::get()->m_player1 : GJBaseGameLayer::get()->m_player2;
-					if (data.frame == frame) {
-						this->handleButton(data.holding, data.button, data.isPlayer1);
+				auto player = (data.isPlayer1) ? GJBaseGameLayer::get()->m_player1 : GJBaseGameLayer::get()->m_player2;
+				if (data.frame == frame) {
+					this->handleButton(data.holding, data.button, data.isPlayer1);
 
-						if (uwuBot::catgirl->m_infoData.posFix && data.pData.xPos != 0 && data.pData.yPos != 0)
-							player->setPosition(ccp(data.pData.xPos, data.pData.yPos));
-						if (uwuBot::catgirl->m_infoData.xVelFix && uwuBot::catgirl->m_infoData.platformer && data.pData.xVel != 0)
-							player->m_platformerXVelocity = data.pData.xVel;
-						if (uwuBot::catgirl->m_infoData.yVelFix && data.pData.yVel != 0)
-							player->m_yVelocity = data.pData.yVel;
-					}
-
-					uwuBot::catgirl->m_currentAction++;
+					if (uwuBot::catgirl->m_infoData.posFix && data.pData.xPos != 0 && data.pData.yPos != 0)
+						player->setPosition(ccp(data.pData.xPos, data.pData.yPos));
+					if (uwuBot::catgirl->m_infoData.xVelFix && uwuBot::catgirl->m_infoData.platformer && data.pData.xVel != 0)
+						player->m_platformerXVelocity = data.pData.xVel;
+					if (uwuBot::catgirl->m_infoData.yVelFix && data.pData.yVel != 0)
+						player->m_yVelocity = data.pData.yVel;
 				}
+
+				uwuBot::catgirl->m_currentAction++;
 			}
 		}
 	}

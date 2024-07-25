@@ -12,6 +12,7 @@ The issue is currently unknown but has to deal with respawning at a checkpoint p
 A list of features that are to be added in the future. <cr>Red</c> means it hasnt been started yet, <cy>Yellow</c> means it is being worked on, and <cg>Green</c> means it is finished.
 
 - <cg>Practice Bug Fix</c>
+- <cr>Frame Advance</c>
 - <cr>Show Trajectory</c>
 - <cr>Show Hitboxes</c>
 - <cr>Menu Redesign</c>
