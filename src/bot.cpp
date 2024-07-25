@@ -66,7 +66,7 @@ BotFileError uwuBot::saveMacro(std::string name) {
 
 	std::string saveLoc = Mod::get()->getSaveDir().string();
 	if (!std::filesystem::exists(saveLoc + "/macros")) std::filesystem::create_directory(saveLoc + "/macros");
-	saveLoc = saveLoc + "/macros/" + name + ".uwu"; //We love UwU files hehe
+	saveLoc = saveLoc + "/macros/" + name + ".ubot"; //Goodbye UwU files
 
 	//Similar format to gdr but we store less (since we can infer details when i add the export as different file type feature)
 	nlohmann::json json;
@@ -122,7 +122,7 @@ BotFileError uwuBot::loadMacro(std::string name) {
 
 	std::string saveLoc = Mod::get()->getSaveDir().string();
 	if (!std::filesystem::exists(saveLoc + "/macros")) std::filesystem::create_directory(saveLoc + "/macros");
-	saveLoc = saveLoc + "/macros/" + name + ".uwu"; //We love UwU files hehe
+	saveLoc = saveLoc + "/macros/" + name + ".ubot"; //Goodbye UwU Files
 
 	if (!std::filesystem::exists(saveLoc)) {
 		return BotFileError::InvalidFileName;

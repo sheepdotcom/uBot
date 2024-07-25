@@ -94,7 +94,7 @@ void refreshMacroList(ScrollLayer* scroll, bool load) {
 	for (auto& macro : std::filesystem::directory_iterator(std::filesystem::u8path(dir))) {
 		if (std::filesystem::is_regular_file(macro)) {
 			auto name = macro.path().filename().string();
-			if (name.ends_with(".uwu")) {
+			if (name.ends_with(".ubot")) {
 				//Lots of math so nothing is really hardcoded.
 				auto edgeDist = 10.f; //Distance away from the edge of the scroll layer.
 				auto gapDist = 10.f; //Distance between each macro cell.

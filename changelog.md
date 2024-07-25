@@ -1,3 +1,7 @@
+# v0.2.5-beta
+
+- Changed macro extension from `.uwu` to `.ubot`
+
 # v0.2.4-beta
 
 - Fixed some issues with replaying while in practice mode
