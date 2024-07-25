@@ -158,7 +158,7 @@ BotFileError uwuBot::loadMacro(std::string name) {
 			json["data"]["posFix"],
 			json["data"]["yVelFix"],
 			json["data"]["xVelFix"],
-			json["data"]["platformer"]
+			json["data"]["plat"]
 		};
 	}
 	else uwuBot::catgirl->m_infoData = {true, false, false, false}; //Fallback for backwards compatibility (pos fix existed in v1)

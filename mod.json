@@ -4,7 +4,7 @@
 		"win": "2.206",
 		"android": "2.206"
 	},
-	"version": "v0.2.5-beta",
+	"version": "v0.2.6-beta",
 	"id": "sheepdotcom.ubot",
 	"name": "uBot",
 	"developer": "sheepdotcom",
@@ -49,6 +49,12 @@
 		"frame-fix": {
 			"name": "Frame Fix",
 			"description": "Makes the macro more accurate but increases the file size, only applies when recording. Not needed anymore since practice bug fix fixes the innacuracies.",
+			"type": "bool",
+			"default": false
+		},
+		"experimental-features": {
+			"name": "Experimental Features",
+			"description": "Enable experimental features that are still a WIP. Be warned they may be very unstable.",
 			"type": "bool",
 			"default": false
 		}

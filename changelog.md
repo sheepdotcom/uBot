@@ -1,3 +1,7 @@
+# v0.2.6-beta
+
+- Fixed the game crashing when trying to load a macro.
+
 # v0.2.5-beta
 
 - Changed macro extension from `.uwu` to `.ubot`
