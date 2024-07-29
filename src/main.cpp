@@ -49,13 +49,13 @@ class $modify(CatgirlsPlay, PlayLayer) {
 			CheckpointSave& save = catgirlsPlay->m_fields->m_checkpoints[checkpoint];
 			save.apply(catgirlsPlay->m_player1, catgirlsPlay->m_gameState.m_isDualMode ? catgirlsPlay->m_player2 : nullptr);
 			//Button "fix" and feature
-			for (size_t i = 0; i < catgirlsPlay->m_fields->m_latestButtons.size(); i++) {
+			/*for (size_t i = 0; i < catgirlsPlay->m_fields->m_latestButtons.size(); i++) {
 				if (i > 2 && !catgirlsPlay->m_gameState.m_isDualMode) break; //If no second player then dont do second player stuff
 				auto player = catgirlsPlay->m_player1;
 				if (i > 2) player = catgirlsPlay->m_player2;
 				auto button = (player->m_holdingButtons[i%3]);
 				if (button != catgirlsPlay->m_fields->m_latestButtons[i]) catgirlsPlay->handleButton(button, i%3, (i > 2));
-			}
+			}*/
 			geode::log::debug("checkpoint loaded");
 		}
 
