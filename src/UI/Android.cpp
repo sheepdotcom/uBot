@@ -24,21 +24,27 @@ void loadMacro(std::string name) {
 }
 
 bool Dropdown::init(CCSize size, std::vector<std::string> content, int selected, SEL_MenuHandler callback, bool openDown) {
-	if (!CCMenu::init()) return false;
+	if (!CCNode::init()) return false;
 
 	this->m_content = content;
 	this->m_callback = callback;
 	this->m_selected = selected;
 	this->m_openDown = openDown;
-
 	this->setContentSize(size);
+	this->setAnchorPoint(ccp(0.5f, 0.5f));
+
+	m_menu = CCMenu::create();
+	m_menu->setPosition(ccp(0.f, 0.f));
+	m_menu->setContentSize(size);
+	this->addChild(m_menu);
+
 	m_background = CCScale9Sprite::create("square02_small.png");
 	m_background->setContentSize(size);
 	m_background->setAnchorPoint(ccp(0.5f, 1.f));
 	m_background->setPosition(ccp(size.width / 2, size.height));
 	m_background->setOpacity(100);
 	m_background->setID("dropdown-background");
-	this->addChild(m_background);
+	m_menu->addChild(m_background);
 
 	m_arrow = CCSprite::createWithSpriteFrameName("edit_downBtn_001.png");
 	m_arrow->setScale(0.75f);
@@ -46,20 +52,20 @@ bool Dropdown::init(CCSize size, std::vector<std::string> content, int selected,
 	btn->setPosition(size / 2);
 	btn->m_animationEnabled = false;
 	btn->setID("dropdown-arrow");
-	btn->setContentSize(size / btn->getScale());
+	btn->setContentSize(ccp(size.width / btn->getScaleX(), size.height / btn->getScaleY()));
 	m_arrow->setPosition(ccp(btn->getScaledContentWidth() - m_arrow->getScaledContentWidth() - 5.f, btn->getScaledContentHeight() / 2));
-	this->addChild(btn);
+	m_menu->addChild(btn);
 
-	auto m_text = CCLabelBMFont::create(m_content[m_selected].c_str(), "bigFont.fnt");
-	m_text->setPosition(size / 2 - ccp(btn->getScaledContentWidth() - (m_arrow->getScaledContentWidth() / 2), 0.f));
+	m_text = CCLabelBMFont::create(m_content[m_selected].c_str(), "bigFont.fnt");
+	m_text->setPosition(ccp((size.width / 2) - (m_arrow->getScaledContentWidth() / 2), (size.height / 2) + 2.f));
 	m_text->limitLabelWidth(size.width - m_arrow->getScaledContentWidth() - 5.f, 0.7f, 0.f);
 	m_text->setID("current-value-text");
-	this->addChild(m_text);
+	m_menu->addChild(m_text);
 
 	auto btnMenu = CCMenu::create();
 	btnMenu->setContentSize(ccp(size.width, m_content.size() * 20.f));
-	btnMenu->setPosition(size / 2);
-	this->addChild(btnMenu);
+	btnMenu->setPosition(ccp(0.f, 0.f - (m_content.size() * 20.f)));
+	m_menu->addChild(btnMenu);
 
 
 	for (size_t c = 0; c < m_content.size(); c++) {
@@ -69,10 +75,10 @@ bool Dropdown::init(CCSize size, std::vector<std::string> content, int selected,
 		label->setID("option-label");
 
 		auto btn2 = CCMenuItemSpriteExtra::create(label, this, menu_selector(Dropdown::selectOption));
-		btn2->setPosition(size / 2 - ccp(0.f, (c + 1) * 20.f));
+		btn2->setPosition(ccp((size.width / 2), (m_content.size() * 20.f) - (c * 20.f * (m_openDown ? 1.f : -1.f)) - 5.f));
 		btn2->setScale(0.f);
 		btn2->setTag(c);
-		btn2->setID(fmt::format("button-{}", c));
+		btn2->setID("option");
 		btn2->setEnabled(false);
 		btnMenu->addChild(btn2);
 
@@ -80,7 +86,6 @@ bool Dropdown::init(CCSize size, std::vector<std::string> content, int selected,
 	}
 
 	handleTouchPriority(this);
-	this->registerWithTouchDispatcher();
 
 	return true;
 }
@@ -96,6 +101,7 @@ Dropdown* Dropdown::create(CCSize size, std::vector<std::string> content, int se
 }
 
 void Dropdown::toggle(CCObject* p0) {
+	m_open = !m_open;
 	auto animTime = 0.35f;
 	m_background->stopAllActions();
 	m_background->runAction(CCEaseOut::create(CCContentSizeTo::create(animTime, this->getContentSize() + ccp(0.f, m_open ? (m_content.size() * 20.f) : 0.f)), 2.0f));
@@ -112,12 +118,11 @@ void Dropdown::toggle(CCObject* p0) {
 }
 
 void Dropdown::selectOption(CCObject* p0) {
-	m_open = false;
 	m_selected = static_cast<CCNode*>(p0)->getTag();
 
 	m_text->setString(m_content[m_selected].c_str());
 	for (size_t i = 0; i < m_buttons.size(); i++) {
-		static_cast<CCLabelBMFont*>(m_buttons[i]->getChildByID("option-label"))->setColor(m_selected == i ? ccColor3B{0, 255, 0} : ccColor3B{0, 0, 0});
+		static_cast<CCLabelBMFont*>(m_buttons[i]->getChildByID("option-label"))->setColor(m_selected == i ? ccColor3B{0, 255, 0} : ccColor3B{255, 255, 255});
 	}
 
 	this->toggle(nullptr);
@@ -131,7 +136,9 @@ void MacroCell::onClick(CCObject* p0) {
 				fmt::format("Do you want to load \"{}\"?\nThis will clear the current macro.", cell->m_macroName),
 				"No", "Yes",
 				[=](auto, bool btn2) {
-					loadMacro(cell->m_macroName);
+					if (btn2) {
+						loadMacro(cell->m_macroName);
+					}
 				}
 			);
 		}
@@ -455,33 +462,13 @@ bool ConvertMacroPopup::init(float mWidth, float mHeight) {
 	menu->setID("main-menu");
 	mainLayer->addChild(menu);
 
-	//scrolling
-	auto scrollBG = CCScale9Sprite::create("square02_001.png", { 0.f,0.f,80.f,80.f });
-	scrollBG->setContentSize(ccp((mWidth - 50.f), (mHeight - 60.f)));
-	scrollBG->setPosition(ccp(winSize.width / 2, winSize.height / 2 + 15.f));
-	scrollBG->setOpacity(100.f);
-	scrollBG->setID("macro-scroll-bg");
-	menu->addChild(scrollBG);
-	auto scroll = ScrollLayer::create(scrollBG->getContentSize(), true, true);
-	scroll->setContentSize(scrollBG->getContentSize());
-	scroll->setPosition(winSize / 2 - (scroll->getContentSize() / 2) + (scrollBG->getPosition() - winSize / 2));
-	scroll->setID("macro-scroll-layer");
-	refreshMacroList(scroll, true);
-	menu->addChild(scroll);
-
-	//Load Button
-	auto loadSprite = ButtonSprite::create("Load");
+	//Convert Button
+	auto loadSprite = ButtonSprite::create("Convert");
 	loadSprite->setScale(0.75f);
 	auto loadButton = CCMenuItemSpriteExtra::create(loadSprite, this, menu_selector(SaveMacroPopup::saveMacro));
-	loadButton->setPosition(ccp((winSize.width / 2) + (mWidth / 2) - (loadButton->getScaledContentWidth() / 2) - 10.f,
-		((winSize.height / 2) - (mHeight / 2) + (scrollBG->getPositionY() - (scrollBG->getScaledContentHeight() / 2)) + 5.f) / 2));
+	loadButton->setPosition(ccp((winSize.width / 2), (winSize.height / 2) - (mHeight / 2)));
 	loadButton->setID("load-button");
 	menu->addChild(loadButton);
-
-	auto dropdown = Dropdown::create(ccp(100.f, 20.f), {".mhr", ".ybot"});
-	dropdown->setPosition(ccp((winSize.width / 2) + (mWidth / 2) - (dropdown->getScaledContentWidth() / 2) - 10.f,
-		((winSize.height / 2) - (mHeight / 2) + (scrollBG->getPositionY() - (scrollBG->getScaledContentHeight() / 2)) + 5.f) / 2));
-	menu->addChild(dropdown);
 
 	handleTouchPriority(this);
 	this->setMouseEnabled(true);
@@ -593,12 +580,12 @@ bool MacroPopup::init(float mWidth, float mHeight) {
 	loadButton->setID("load-button");
 	menu->addChild(loadButton);
 
-	/*auto convertSprite = ButtonSprite::create("Convert");
+	auto convertSprite = ButtonSprite::create("Convert");
 	convertSprite->setScale(0.7f);
 	auto convertButton = CCMenuItemSpriteExtra::create(convertSprite, this, menu_selector(ConvertMacroPopup::openPopup));
 	convertButton->setPosition(ccp((winSize.width / 2) + (mWidth / 4), (saveButton->getPositionY()) - 30.f));
 	convertButton->setID("convert-button");
-	menu->addChild(convertButton);*/
+	menu->addChild(convertButton);
 
 	auto settingsSpr = CCSprite::createWithSpriteFrameName("GJ_optionsBtn_001.png");
 	settingsSpr->setScale(0.7f);

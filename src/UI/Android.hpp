@@ -78,8 +78,9 @@ public:
 	}
 };
 
-class Dropdown : public CCMenu {
+class Dropdown : public CCNode {
 public:
+	CCMenu* m_menu;
 	CCScale9Sprite* m_background;
 	CCSprite* m_arrow;
 	CCLabelBMFont* m_text;

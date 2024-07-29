@@ -15,6 +15,8 @@ using namespace geode::prelude;
 class $modify(CatgirlsPlay, PlayLayer) {
 	struct Fields {
 		std::unordered_map<CheckpointObject*, CheckpointSave> m_checkpoints;
+		std::vector<bool> m_latestButtons = {false, false, false, false, false, false}; //Vector  (p1 is first 3, p2 is last 3)
+		bool m_justPaused = false;
 	};
 
 	bool init(GJGameLevel * level, bool useReplay, bool dontCreateObjects) {
@@ -41,11 +43,20 @@ class $modify(CatgirlsPlay, PlayLayer) {
 
 	void loadFromCheckpoint(CheckpointObject* checkpoint) {
 		CatgirlsPlay* catgirlsPlay = static_cast<CatgirlsPlay*>(CatgirlsPlay::get());
-
+		
 		PlayLayer::loadFromCheckpoint(checkpoint);
 		if (Mod::get()->getSettingValue<bool>("practice-fix") && catgirlsPlay->m_fields->m_checkpoints.contains(checkpoint)) {
 			CheckpointSave& save = catgirlsPlay->m_fields->m_checkpoints[checkpoint];
 			save.apply(catgirlsPlay->m_player1, catgirlsPlay->m_gameState.m_isDualMode ? catgirlsPlay->m_player2 : nullptr);
+			//Button "fix" and feature
+			for (size_t i = 0; i < catgirlsPlay->m_fields->m_latestButtons.size(); i++) {
+				if (i > 2 && !catgirlsPlay->m_gameState.m_isDualMode) break; //If no second player then dont do second player stuff
+				auto player = catgirlsPlay->m_player1;
+				if (i > 2) player = catgirlsPlay->m_player2;
+				auto button = (player->m_holdingButtons[i%3]);
+				if (button != catgirlsPlay->m_fields->m_latestButtons[i]) catgirlsPlay->handleButton(button, i%3, (i > 2));
+			}
+			geode::log::debug("checkpoint loaded");
 		}
 
 		auto frame = uwuBot::catgirl->getCurrentFrame();
@@ -60,6 +71,20 @@ class $modify(CatgirlsPlay, PlayLayer) {
 		}
 
 		uwuBot::catgirl->clearInputsAfterFrame(uwuBot::catgirl->getCurrentFrame());
+	}
+
+	void pauseGame(bool p0) {
+		auto catgirlsPlay = static_cast<CatgirlsPlay*>(CatgirlsPlay::get());
+		catgirlsPlay->m_fields->m_justPaused = true;
+		PlayLayer::pauseGame(p0);
+		catgirlsPlay->m_fields->m_justPaused = false;
+	}
+
+	void resume() {
+		auto catgirlsPlay = static_cast<CatgirlsPlay*>(CatgirlsPlay::get());
+		catgirlsPlay->m_fields->m_justPaused = true;
+		PlayLayer::resume();
+		catgirlsPlay->m_fields->m_justPaused = false;
 	}
 
 	void onQuit() {
@@ -91,6 +116,13 @@ class $modify(PlayerObject) {
 	void playerDestroyed(bool p0) {
 		PlayerObject::playerDestroyed(p0);
 	}
+
+	/*void releaseAllButtons() {
+		auto catgirlsPlay = static_cast<CatgirlsPlay*>(CatgirlsPlay::get());
+		//Do this instead so I dont have to patch PlayLayer::pauseGame
+		if (!catgirlsPlay->m_fields->m_justPaused) PlayerObject::releaseAllButtons();
+		geode::log::debug("release buttons {}", catgirlsPlay->m_fields->m_justPaused);
+	}*/
 };
 
 class $modify(PauseLayer) {
@@ -121,6 +153,15 @@ class $modify(PauseLayer) {
 class $modify(GJBaseGameLayer) {
 	void handleButton(bool holding, int button, bool player1) {
 		GJBaseGameLayer::handleButton(holding, button, player1);
+		//geode::log::debug("{} {} {}", holding, button, player1);
+		//Update latest button list :3
+		for (PlayerButtonCommand button : GJBaseGameLayer::get()->m_queuedButtons) {
+			auto btn = static_cast<size_t>(button.m_button);
+			auto i = btn + (button.m_isPlayer2 ? 3 : 0);
+			auto catgirlsPlay = static_cast<CatgirlsPlay*>(CatgirlsPlay::get());
+			catgirlsPlay->m_fields->m_latestButtons[i] = button.m_isPush;
+		}
+
 		if (uwuBot::catgirl->m_state == state::recording) {
 			playerData pData;
 			auto player = (player1) ? this->m_player1 : this->m_player2; //Saves some code :3
@@ -188,6 +229,7 @@ class $modify(EndLevelLayer) {
 
 class $modify(CCScheduler) {
 	void update(float dt) {
+		//if (GJBaseGameLayer::get()) for (PlayerButtonCommand btn : GJBaseGameLayer::get()->m_queuedButtons) geode::log::debug("btn {} push {} p2 {} step {}", static_cast<int>(btn.m_button), btn.m_isPush, btn.m_isPlayer2, btn.m_step);
 		//Hopefully this doesnt crash :3
 		CCArray* nodes = CCDirector::sharedDirector()->getRunningScene()->getChildren();
 		CCObject* obj;
