@@ -1,6 +1,6 @@
 # uBot
 This is where she makes a mod.
 
-Originally called uwuBot, this name will forever be in my heart.
+Originally called uwuBot, you will forever be in our hearts.
 
-Currently in beta due to many features still to be added but the bot does work perfectly fine right now.
+Currently in beta due to many features still to be added but the bot does work ~~perfectly~~ fine right now.

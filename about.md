@@ -12,7 +12,7 @@ A list of features that are to be added in the future. <cr>Red</c> means it hasn
 - <cr>Frame Advance</c>
 - <cr>Show Trajectory</c>
 - <cr>Show Hitboxes</c>
-- <cy>Menu Redesign</c>
+- <cr>Menu Redesign</c>
 - <cr>Disable checkpoints (for platformer)</c>
 - <cr>Internal Recorder</c>
 - <cy>Converting macros from one type to another</c>

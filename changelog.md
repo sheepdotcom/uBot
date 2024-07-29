@@ -1,8 +1,7 @@
 # v0.3.0-beta
 
-- Updated to geode v3.3.1
+- Updated to geode v3.4.0
 - Updated practice bug fix
-- Holding a movement button then unpausing will now move the player instead of being ignored
 
 # v0.2.6-beta
 
