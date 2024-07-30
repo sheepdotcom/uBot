@@ -46,6 +46,7 @@ class $modify(CatgirlsPlay, PlayLayer) {
 		
 		PlayLayer::loadFromCheckpoint(checkpoint);
 		if (Mod::get()->getSettingValue<bool>("practice-fix") && catgirlsPlay->m_fields->m_checkpoints.contains(checkpoint)) {
+			geode::log::debug("checkpoint loaded {}", checkpoint->m_physicalCheckpointObject == nullptr);
 			CheckpointSave& save = catgirlsPlay->m_fields->m_checkpoints[checkpoint];
 			save.apply(catgirlsPlay->m_player1, catgirlsPlay->m_gameState.m_isDualMode ? catgirlsPlay->m_player2 : nullptr);
 			//Button "fix" and feature
@@ -73,14 +74,16 @@ class $modify(CatgirlsPlay, PlayLayer) {
 		uwuBot::catgirl->clearInputsAfterFrame(uwuBot::catgirl->getCurrentFrame());
 	}
 
-	void pauseGame(bool p0) {
+	void pauseGame(bool paused) {
+		uwuBot::catgirl->resetAudioSpeed();
 		auto catgirlsPlay = static_cast<CatgirlsPlay*>(CatgirlsPlay::get());
 		catgirlsPlay->m_fields->m_justPaused = true;
-		PlayLayer::pauseGame(p0);
+		PlayLayer::pauseGame(paused);
 		catgirlsPlay->m_fields->m_justPaused = false;
 	}
 
 	void resume() {
+		uwuBot::catgirl->resetAudioSpeed();
 		auto catgirlsPlay = static_cast<CatgirlsPlay*>(CatgirlsPlay::get());
 		catgirlsPlay->m_fields->m_justPaused = true;
 		PlayLayer::resume();
@@ -88,6 +91,7 @@ class $modify(CatgirlsPlay, PlayLayer) {
 	}
 
 	void onQuit() {
+		uwuBot::catgirl->resetAudioSpeed();
 		m_fields->m_checkpoints.clear();
 		PlayLayer::onQuit();
 	}
@@ -187,6 +191,24 @@ class $modify(GJBaseGameLayer) {
 		if (uwuBot::catgirl->frameLabel != nullptr) {
 			uwuBot::catgirl->frameLabel->setString(fmt::format("Frame: {}", uwuBot::catgirl->getCurrentFrame()).c_str());
 		}
+		if (Mod::get()->getSettingValue<bool>("lock-delta")) {
+			if (Mod::get()->getSettingValue<bool>("lock-delta-audio")) {
+				auto songPos = (m_gameState.m_currentProgress / 240.f) * 1000.f;
+				songPos += m_levelSettings->m_songOffset * 1000.f;
+
+				FMOD::Channel* channel;
+
+				for (size_t i = 0; i < 2; i++) {
+					FMODAudioEngine::sharedEngine()->m_system->getChannel(126 + i, &channel);
+					if (channel) {
+						uint32_t channelPos = 0;
+						channel->getPosition(&channelPos, FMOD_TIMEUNIT_MS);
+						if (channelPos <= 0) continue;
+						if (channelPos - songPos > 0.05f) channel->setPosition(songPos, FMOD_TIMEUNIT_MS);
+					}
+				}
+			}
+		}
 		GJBaseGameLayer::update(dt);
 	}
 
@@ -246,10 +268,6 @@ class $modify(CCScheduler) {
 				dt2 = 1.f / 240.f;
 			}
 
-			if (CCScheduler::get()->getTimeScale() != 1.f) {
-				geode::log::debug("{}", CCScheduler::get()->getTimeScale());
-			}
-
 			std::stringstream ss;
 			ss << std::fixed << std::setprecision(2) << static_cast<float>(Mod::get()->getSettingValue<double>("speedhack"));
 			float speed = std::stof(ss.str());
@@ -261,9 +279,11 @@ class $modify(CCScheduler) {
 				}
 			}
 		}
-		FMOD::ChannelGroup* channel;
-		FMODAudioEngine::sharedEngine()->m_system->getMasterChannelGroup(&channel);
-		channel->setPitch(audioSpeed);
+		for (size_t i = 0; i < 2; i++) {
+			FMOD::Channel* channel;
+			FMODAudioEngine::sharedEngine()->m_system->getChannel(126 + i, &channel);
+			if (channel) channel->setPitch(audioSpeed);
+		}
 		CCScheduler::update(dt2);
 	}
 };

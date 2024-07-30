@@ -40,6 +40,12 @@
 			"type": "bool",
 			"default": true
 		},
+		"lock-delta-audio": {
+			"name": "Lock Delta Audio Sync",
+			"description": "(Experimental) Syncs the audio whenever the game falls behind the normal speed while using lock delta.",
+			"type": "bool",
+			"default": false
+		},
 		"practice-fix": {
 			"name": "Practice Bug Fix",
 			"description": "Fixes checkpoints not properly saving and loading player data and inturn creating small inaccuracies",

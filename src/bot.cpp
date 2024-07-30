@@ -242,6 +242,14 @@ void uwuBot::updateLabels() {
 	}
 }
 
+void uwuBot::resetAudioSpeed() {
+	for (size_t i = 0; i < 2; i++) {
+		FMOD::Channel* channel;
+		FMODAudioEngine::sharedEngine()->m_system->getChannel(126 + i, &channel);
+		if (channel) channel->setPitch(1.f);
+	}
+}
+
 //Practice Bug Fix, using the same method as eclipse menu :3
 PlayerSaveObject::PlayerSaveObject(PlayerObject* player) {
 	m_wasTeleported = player->m_wasTeleported;
@@ -422,8 +430,8 @@ PlayerSaveObject::PlayerSaveObject(PlayerObject* player) {
 	m_maybeStateForce2 = player->m_maybeStateForce2;
 	m_stateScale = player->m_stateScale;
 	m_platformerXVelocity = player->m_platformerXVelocity;
-	m_holdingRight = player->m_holdingRight;
-	m_holdingLeft = player->m_holdingLeft;
+	//m_holdingRight = player->m_holdingRight;
+	//m_holdingLeft = player->m_holdingLeft;
 	m_leftPressedFirst = player->m_leftPressedFirst;
 	m_scaleXRelated = player->m_scaleXRelated;
 	m_maybeHasStopped = player->m_maybeHasStopped;
@@ -485,7 +493,7 @@ PlayerSaveObject::PlayerSaveObject(PlayerObject* player) {
 #endif
 	m_playerFollowFloats = player->m_playerFollowFloats;
 	m_jumpPadRelated = player->m_jumpPadRelated;
-	m_holdingButtons = player->m_holdingButtons;
+	//m_holdingButtons = player->m_holdingButtons;
 
 	//Custom fields
 	m_xPosition = player->getPositionX();
@@ -671,8 +679,8 @@ void PlayerSaveObject::apply(PlayerObject* player) {
 	player->m_maybeStateForce2 = m_maybeStateForce2;
 	player->m_stateScale = m_stateScale;
 	player->m_platformerXVelocity = m_platformerXVelocity;
-	player->m_holdingRight = m_holdingRight;
-	player->m_holdingLeft = m_holdingLeft;
+	//player->m_holdingRight = m_holdingRight;
+	//player->m_holdingLeft = m_holdingLeft;
 	player->m_leftPressedFirst = m_leftPressedFirst;
 	player->m_scaleXRelated = m_scaleXRelated;
 	player->m_maybeHasStopped = m_maybeHasStopped;
@@ -734,7 +742,7 @@ void PlayerSaveObject::apply(PlayerObject* player) {
 #endif
 	player->m_playerFollowFloats = m_playerFollowFloats;
 	player->m_jumpPadRelated = m_jumpPadRelated;
-	player->m_holdingButtons = m_holdingButtons;
+	//player->m_holdingButtons = m_holdingButtons;
 
 	//Custom fields
 	player->setPositionX(m_xPosition);

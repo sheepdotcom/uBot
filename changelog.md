@@ -1,7 +1,8 @@
-# v0.3.0-beta
+# v0.2.7-beta
 
 - Updated to geode v3.4.0
 - Updated practice bug fix
+- Added an experimental lock delta audio sync
 
 # v0.2.6-beta
 
