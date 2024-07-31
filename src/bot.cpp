@@ -31,9 +31,7 @@ void uwuBot::clearInputsAfterFrame(int frame) {
 				if (uwuBot::catgirl->m_macroData.back().holding) {
 					//Add code to fix loading checkpoint where player was holding and hasnt released the button
 					auto nya = (catgirlGame->m_gameState.m_isDualMode) ? 2 : 1;
-					geode::log::debug("nya {}", nya);
 					for (size_t player = 0; player < nya; player++) {
-						geode::log::debug("p {} nya {}", player, nya);
 						auto p = (player == 0) ? catgirlGame->m_player1 : catgirlGame->m_player2;
 						if (p) {
 							catgirlGame->handleButton(false, 1, (player == 0));
