@@ -15,7 +15,6 @@ using namespace geode::prelude;
 class $modify(CatgirlsPlay, PlayLayer) {
 	struct Fields {
 		std::unordered_map<CheckpointObject*, CheckpointSave> m_checkpoints;
-		std::unordered_map<CheckpointObject*, CheckpointGameObject*>
 		std::vector<bool> m_latestButtons = {false, false, false, false, false, false}; //Vector  (p1 is first 3, p2 is last 3)
 		bool m_justPaused = false;
 	};
@@ -128,14 +127,6 @@ class $modify(CheckpointObject) {
 			}
 		}
 		return res;
-	}
-};
-
-#include <Geode/modify/CheckpointGameObject.hpp>
-class $modify(CheckpointGameObject) {
-	virtual void triggerActivated(float p0) {
-		CheckpointGameObject::triggerActivated(p0);
-		geode::log::debug("catgirl catgirl >w< >w<");
 	}
 };
 
