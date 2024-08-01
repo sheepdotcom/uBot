@@ -15,6 +15,7 @@ using namespace geode::prelude;
 class $modify(CatgirlsPlay, PlayLayer) {
 	struct Fields {
 		std::unordered_map<CheckpointObject*, CheckpointSave> m_checkpoints;
+		std::unordered_map<CheckpointObject*, CheckpointGameObject*>
 		std::vector<bool> m_latestButtons = {false, false, false, false, false, false}; //Vector  (p1 is first 3, p2 is last 3)
 		bool m_justPaused = false;
 	};
@@ -48,6 +49,10 @@ class $modify(CatgirlsPlay, PlayLayer) {
 		if (Mod::get()->getSettingValue<bool>("practice-fix") && catgirlsPlay->m_fields->m_checkpoints.contains(checkpoint)) {
 			CheckpointSave& save = catgirlsPlay->m_fields->m_checkpoints[checkpoint];
 			save.apply(catgirlsPlay->m_player1, catgirlsPlay->m_gameState.m_isDualMode ? catgirlsPlay->m_player2 : nullptr);
+			geode::log::debug("checkpoint loaded");
+			if (typeinfo_cast<CheckpointGameObject*>(checkpoint->m_physicalCheckpointObject)) {
+				geode::log::debug("catgirl catgirl catgirl catgirl");
+			}
 			//Button "fix" and feature
 			/*for (size_t i = 0; i < catgirlsPlay->m_fields->m_latestButtons.size(); i++) {
 				if (i > 2 && !catgirlsPlay->m_gameState.m_isDualMode) break; //If no second player then dont do second player stuff
@@ -98,6 +103,17 @@ class $modify(CatgirlsPlay, PlayLayer) {
 		PlayLayer::levelComplete();
 		uwuBot::catgirl->clearState();
 	}
+
+	CheckpointObject* createCheckpoint() {
+		auto ret = PlayLayer::createCheckpoint();
+		geode::log::debug("checkpoint >w<");
+		return ret;
+	}
+
+	void storeCheckpoint(CheckpointObject* p0) {
+		geode::log::debug("store checkpoint {} {}", p0->m_physicalCheckpointObject->m_uID, p0->m_physicalCheckpointObject->m_uniqueID);
+		PlayLayer::storeCheckpoint(p0);
+	}
 };
 
 class $modify(CheckpointObject) {
@@ -105,12 +121,21 @@ class $modify(CheckpointObject) {
 		auto res = CheckpointObject::init();
 		if (Mod::get()->getSettingValue<bool>("practice-fix")) {
 			CatgirlsPlay* catgirlsPlay = static_cast<CatgirlsPlay*>(CatgirlsPlay::get());
+			geode::log::debug("checkpoint loaded on frame {}", uwuBot::catgirl->getCurrentFrame());
 			if (uwuBot::catgirl->getCurrentFrame() > 0) {
 				CheckpointSave save(catgirlsPlay->m_player1, catgirlsPlay->m_gameState.m_isDualMode ? catgirlsPlay->m_player2 : nullptr);
 				catgirlsPlay->m_fields->m_checkpoints[this] = save;
 			}
 		}
 		return res;
+	}
+};
+
+#include <Geode/modify/CheckpointGameObject.hpp>
+class $modify(CheckpointGameObject) {
+	virtual void triggerActivated(float p0) {
+		CheckpointGameObject::triggerActivated(p0);
+		geode::log::debug("catgirl catgirl >w< >w<");
 	}
 };
 
@@ -282,7 +307,13 @@ class $modify(CCScheduler) {
 		for (size_t i = 0; i < 2; i++) {
 			FMOD::Channel* channel;
 			FMODAudioEngine::sharedEngine()->m_system->getChannel(126 + i, &channel);
-			if (channel) channel->setPitch(audioSpeed);
+			if (channel) {
+				FMOD::Sound* sound;
+				channel->getCurrentSound(&sound);
+				float freq;
+				sound->getDefaults(&freq, nullptr);
+				channel->setFrequency(freq * audioSpeed);
+			}
 		}
 		CCScheduler::update(dt2);
 	}

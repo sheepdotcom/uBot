@@ -1,7 +1,7 @@
 # v0.2.7-beta
 
 - Updated to geode v3.4.0
-- Updated practice bug fix
+- Updated practice bug fix and made it not apply to platformer checkpoints
 - Added an experimental lock delta audio sync
 
 # v0.2.6-beta
