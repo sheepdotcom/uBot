@@ -4,7 +4,7 @@
 		"win": "2.206",
 		"android": "2.206"
 	},
-	"version": "v0.2.6-beta",
+	"version": "v0.3.0-beta",
 	"id": "sheepdotcom.ubot",
 	"name": "uBot",
 	"developer": "sheepdotcom",
@@ -49,6 +49,12 @@
 		"practice-fix": {
 			"name": "Practice Bug Fix",
 			"description": "Fixes checkpoints not properly saving and loading player data and inturn creating small inaccuracies",
+			"type": "bool",
+			"default": true
+		},
+		"disable-checkpoints": {
+			"name": "Disable Platformer Checkpoints",
+			"description": "Disables platformer level checkpoints during recording and replaying as they can break macros",
 			"type": "bool",
 			"default": true
 		},

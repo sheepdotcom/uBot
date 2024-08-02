@@ -15,8 +15,10 @@ using namespace geode::prelude;
 class $modify(CatgirlsPlay, PlayLayer) {
 	struct Fields {
 		std::unordered_map<CheckpointObject*, CheckpointSave> m_checkpoints;
+		std::unordered_map<CheckpointObject*, CheckpointGameObject*> m_platformerCheckpoints;
 		std::vector<bool> m_latestButtons = {false, false, false, false, false, false}; //Vector  (p1 is first 3, p2 is last 3)
 		bool m_justPaused = false;
+		CheckpointGameObject* m_lastPlatformerCheckpoint = nullptr;
 	};
 
 	bool init(GJGameLevel * level, bool useReplay, bool dontCreateObjects) {
@@ -29,7 +31,10 @@ class $modify(CatgirlsPlay, PlayLayer) {
 	}
 
 	void resetLevel() {
-		if (m_checkpointArray->count() <= 0) m_fields->m_checkpoints.clear();
+		if (m_checkpointArray->count() <= 0) {
+			m_fields->m_checkpoints.clear();
+			m_fields->m_platformerCheckpoints.clear();
+		}
 
 		PlayLayer::resetLevel();
 		uwuBot::catgirl->updateLabels();
@@ -41,27 +46,36 @@ class $modify(CatgirlsPlay, PlayLayer) {
 		if (!uwuBot::catgirl->m_macroData.empty()) uwuBot::catgirl->m_macroData.clear();
 	}
 
+	void checkpointActivated(CheckpointGameObject* checkpoint) {
+		PlayLayer::checkpointActivated(checkpoint);
+		CatgirlsPlay* catgirlsPlay = static_cast<CatgirlsPlay*>(CatgirlsPlay::get());
+		catgirlsPlay->m_fields->m_lastPlatformerCheckpoint = checkpoint;
+	}
+
 	void loadFromCheckpoint(CheckpointObject* checkpoint) {
 		CatgirlsPlay* catgirlsPlay = static_cast<CatgirlsPlay*>(CatgirlsPlay::get());
-		
+		if (uwuBot::catgirl->m_state != state::off && Mod::get()->getSettingValue<bool>("disable-checkpoints")) {
+			auto checkpointList = CCArrayExt<CheckpointObject*>(m_checkpointArray);
+			for (auto nya = checkpointList.rbegin(); nya != checkpointList.rend(); nya++) {
+				checkpoint = *nya;
+				if (!catgirlsPlay->m_fields->m_platformerCheckpoints.contains(*nya)) break;
+			}
+		}
+
 		PlayLayer::loadFromCheckpoint(checkpoint);
-		if (uwuBot::catgirl->m_state != state::off || !this->m_isPlatformer) {
-			if (Mod::get()->getSettingValue<bool>("practice-fix") && catgirlsPlay->m_fields->m_checkpoints.contains(checkpoint)) {
+		if (Mod::get()->getSettingValue<bool>("practice-fix") && catgirlsPlay->m_fields->m_checkpoints.contains(checkpoint)) {
+			if (!catgirlsPlay->m_fields->m_platformerCheckpoints.contains(checkpoint)) {
 				CheckpointSave& save = catgirlsPlay->m_fields->m_checkpoints[checkpoint];
 				save.apply(catgirlsPlay->m_player1, catgirlsPlay->m_gameState.m_isDualMode ? catgirlsPlay->m_player2 : nullptr);
-				geode::log::debug("checkpoint loaded");
-				if (typeinfo_cast<CheckpointGameObject*>(checkpoint->m_physicalCheckpointObject)) {
-					geode::log::debug("catgirl catgirl catgirl catgirl");
-				}
-				//Button "fix" and feature
-				/*for (size_t i = 0; i < catgirlsPlay->m_fields->m_latestButtons.size(); i++) {
-					if (i > 2 && !catgirlsPlay->m_gameState.m_isDualMode) break; //If no second player then dont do second player stuff
-					auto player = catgirlsPlay->m_player1;
-					if (i > 2) player = catgirlsPlay->m_player2;
-					auto button = (player->m_holdingButtons[i%3]);
-					if (button != catgirlsPlay->m_fields->m_latestButtons[i]) catgirlsPlay->handleButton(button, i%3, (i > 2));
-				}*/
 			}
+			//Button "fix" and feature
+			/*for (size_t i = 0; i < catgirlsPlay->m_fields->m_latestButtons.size(); i++) {
+				if (i > 2 && !catgirlsPlay->m_gameState.m_isDualMode) break; //If no second player then dont do second player stuff
+				auto player = catgirlsPlay->m_player1;
+				if (i > 2) player = catgirlsPlay->m_player2;
+				auto button = (player->m_holdingButtons[i%3]);
+				if (button != catgirlsPlay->m_fields->m_latestButtons[i]) catgirlsPlay->handleButton(button, i%3, (i > 2));
+			}*/
 		}
 
 		auto frame = uwuBot::catgirl->getCurrentFrame();
@@ -97,6 +111,7 @@ class $modify(CatgirlsPlay, PlayLayer) {
 	void onQuit() {
 		uwuBot::catgirl->resetAudioSpeed();
 		m_fields->m_checkpoints.clear();
+		m_fields->m_platformerCheckpoints.clear();
 		PlayLayer::onQuit();
 	}
 
@@ -107,13 +122,11 @@ class $modify(CatgirlsPlay, PlayLayer) {
 
 	CheckpointObject* createCheckpoint() {
 		auto ret = PlayLayer::createCheckpoint();
-		geode::log::debug("checkpoint >w<");
 		return ret;
 	}
 
-	void storeCheckpoint(CheckpointObject* p0) {
-		geode::log::debug("store checkpoint {} {}", p0->m_physicalCheckpointObject->m_uID, p0->m_physicalCheckpointObject->m_uniqueID);
-		PlayLayer::storeCheckpoint(p0);
+	void storeCheckpoint(CheckpointObject* checkpoint) {
+		PlayLayer::storeCheckpoint(checkpoint);
 	}
 };
 
@@ -122,10 +135,14 @@ class $modify(CheckpointObject) {
 		auto res = CheckpointObject::init();
 		if (Mod::get()->getSettingValue<bool>("practice-fix")) {
 			CatgirlsPlay* catgirlsPlay = static_cast<CatgirlsPlay*>(CatgirlsPlay::get());
-			geode::log::debug("checkpoint loaded on frame {}", uwuBot::catgirl->getCurrentFrame());
 			if (uwuBot::catgirl->getCurrentFrame() > 0) {
 				CheckpointSave save(catgirlsPlay->m_player1, catgirlsPlay->m_gameState.m_isDualMode ? catgirlsPlay->m_player2 : nullptr);
 				catgirlsPlay->m_fields->m_checkpoints[this] = save;
+				if (catgirlsPlay->m_fields->m_lastPlatformerCheckpoint) {
+					geode::log::debug("please help the catgirls >w<");
+					catgirlsPlay->m_fields->m_platformerCheckpoints[this] = catgirlsPlay->m_fields->m_lastPlatformerCheckpoint;
+					catgirlsPlay->m_fields->m_lastPlatformerCheckpoint = nullptr;
+				}
 			}
 		}
 		return res;

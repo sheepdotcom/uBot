@@ -218,10 +218,10 @@ void refreshMacroList(ScrollLayer* scroll, std::vector<std::filesystem::path> ma
 
 	auto edgeDist = 10.f; //Distance away from the edge of the scroll layer.
 	auto gapDist = 10.f; //Distance between each macro cell.
-	CCSize size = ccp((scroll->getContentWidth() / 2) - edgeDist - gapDist / 2, 30.f);
+	CCSize size = ccp((scroll->getContentWidth() / 2.f) - edgeDist - gapDist / 2.f, 30.f);
 
 	//Math for cute catgirls >w<
-	scroll->m_contentLayer->setContentHeight(std::fmax(floor((macroList.size()-1)/2) * (size.height + gapDist) + size.height + (edgeDist * 2), scroll->getContentHeight()));
+	scroll->m_contentLayer->setContentHeight(std::fmax(floor((macroList.size()-1)/2.f) * (size.height + gapDist) + size.height + (edgeDist * 2.f), scroll->getContentHeight()));
 
 	for (size_t i = 0; i < macroList.size(); i++) {
 		std::filesystem::path macro = macroList[i];
