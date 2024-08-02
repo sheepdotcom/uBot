@@ -194,27 +194,40 @@ MacroCell* MacroCell::create(std::filesystem::path path, float width, float heig
 	return nullptr;
 }
 
-void refreshMacroList(ScrollLayer* scroll, bool load) {
+std::vector<std::filesystem::path> getMacroList() {
 	size_t i = 0;
+	std::vector<std::filesystem::path> macroList;
 	auto dir = (Mod::get()->getSaveDir().string() + "/macros");
 	if (!std::filesystem::exists(dir)) std::filesystem::create_directory(dir);
 
 	for (auto& macro : std::filesystem::directory_iterator(std::filesystem::u8path(dir))) {
 		if (std::filesystem::is_regular_file(macro)) {
-			auto name = macro.path().filename().string();
-			if (name.ends_with(".ubot")) {
-				//Lots of math so nothing is really hardcoded.
-				auto edgeDist = 10.f; //Distance away from the edge of the scroll layer.
-				auto gapDist = 10.f; //Distance between each macro cell.
-				CCSize size = ccp((scroll->getContentWidth()/2) - edgeDist - gapDist/2, 40.f);
-
-				auto macroCell = MacroCell::create(macro.path(), size.width, size.height, load);
-				macroCell->setPosition(ccp(edgeDist + (i%2 * (size.width + gapDist)), scroll->m_contentLayer->getContentHeight() - edgeDist - (floor(i/2) * (size.height + gapDist)) - size.height));
-				scroll->m_contentLayer->addChild(macroCell);
+			auto name = macro.path().filename();
+			if (name.extension().string() == ".ubot") {
+				macroList.push_back(macro.path());
 
 				i++;
 			}
 		}
+	}
+	return macroList;
+}
+
+void refreshMacroList(ScrollLayer* scroll, std::vector<std::filesystem::path> macroList, bool load) {
+	size_t i = 0;
+
+	auto edgeDist = 10.f; //Distance away from the edge of the scroll layer.
+	auto gapDist = 10.f; //Distance between each macro cell.
+	CCSize size = ccp((scroll->getContentWidth() / 2) - edgeDist - gapDist / 2, 30.f);
+
+	//Math for cute catgirls >w<
+	scroll->m_contentLayer->setContentHeight(std::fmax(floor((macroList.size()-1)/2) * (size.height + gapDist) + size.height + (edgeDist * 2), scroll->getContentHeight()));
+
+	for (size_t i = 0; i < macroList.size(); i++) {
+		std::filesystem::path macro = macroList[i];
+		auto macroCell = MacroCell::create(macro, size.width, size.height, load);
+		macroCell->setPosition(ccp(edgeDist + (i % 2 * (size.width + gapDist)), scroll->m_contentLayer->getContentHeight() - edgeDist - (floor(i / 2) * (size.height + gapDist)) - size.height));
+		scroll->m_contentLayer->addChild(macroCell);
 	}
 }
 
@@ -260,7 +273,9 @@ bool SaveMacroPopup::init(float mWidth, float mHeight) {
 	scroll->setContentSize(scrollBG->getContentSize());
 	scroll->setPosition(winSize/2 - (scroll->getContentSize()/2) + (scrollBG->getPosition() - winSize/2));
 	scroll->setID("macro-scroll-layer");
-	refreshMacroList(scroll, false);
+	auto macroList = getMacroList();
+	refreshMacroList(scroll, macroList, false);
+	scroll->scrollToTop();
 	menu->addChild(scroll);
 
 	//Is that the save button?
@@ -377,7 +392,8 @@ bool LoadMacroPopup::init(float mWidth, float mHeight) {
 	scroll->setContentSize(scrollBG->getContentSize());
 	scroll->setPosition(winSize / 2 - (scroll->getContentSize() / 2) + (scrollBG->getPosition() - winSize / 2));
 	scroll->setID("macro-scroll-layer");
-	refreshMacroList(scroll, true);
+	auto macroList = getMacroList();
+	refreshMacroList(scroll, macroList, true);
 	menu->addChild(scroll);
 
 	//Load Button
@@ -463,9 +479,9 @@ bool ConvertMacroPopup::init(float mWidth, float mHeight) {
 	mainLayer->addChild(menu);
 
 	//Convert Button
-	auto loadSprite = ButtonSprite::create("Convert");
+	auto loadSprite = ButtonSprite::create("Convert (Currently useless >w<)");
 	loadSprite->setScale(0.75f);
-	auto loadButton = CCMenuItemSpriteExtra::create(loadSprite, this, menu_selector(SaveMacroPopup::saveMacro));
+	auto loadButton = CCMenuItemSpriteExtra::create(loadSprite, this, nullptr);
 	loadButton->setPosition(ccp((winSize.width / 2), (winSize.height / 2) - (mHeight / 2)));
 	loadButton->setID("load-button");
 	menu->addChild(loadButton);
@@ -580,12 +596,14 @@ bool MacroPopup::init(float mWidth, float mHeight) {
 	loadButton->setID("load-button");
 	menu->addChild(loadButton);
 
-	auto convertSprite = ButtonSprite::create("Convert");
-	convertSprite->setScale(0.7f);
-	auto convertButton = CCMenuItemSpriteExtra::create(convertSprite, this, menu_selector(ConvertMacroPopup::openPopup));
-	convertButton->setPosition(ccp((winSize.width / 2) + (mWidth / 4), (saveButton->getPositionY()) - 30.f));
-	convertButton->setID("convert-button");
-	menu->addChild(convertButton);
+	if (Mod::get()->getSettingValue<bool>("experimental-features")) {
+		auto convertSprite = ButtonSprite::create("Convert");
+		convertSprite->setScale(0.7f);
+		auto convertButton = CCMenuItemSpriteExtra::create(convertSprite, this, menu_selector(ConvertMacroPopup::openPopup));
+		convertButton->setPosition(ccp((winSize.width / 2) + (mWidth / 4), (saveButton->getPositionY()) - 30.f));
+		convertButton->setID("convert-button");
+		menu->addChild(convertButton);
+	}
 
 	auto settingsSpr = CCSprite::createWithSpriteFrameName("GJ_optionsBtn_001.png");
 	settingsSpr->setScale(0.7f);

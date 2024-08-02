@@ -60,7 +60,7 @@
 		},
 		"experimental-features": {
 			"name": "Experimental Features",
-			"description": "Enable experimental features that are still a WIP. Be warned they may be very unstable.",
+			"description": "Enable experimental features that are still a WIP. Be warned they can be unstable. Currently only enables the extremely unfinished convert macro section.",
 			"type": "bool",
 			"default": false
 		}

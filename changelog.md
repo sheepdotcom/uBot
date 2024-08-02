@@ -1,8 +1,10 @@
-# v0.2.7-beta
+# v0.3.0-beta
 
 - Updated to geode v3.4.0
-- Updated practice bug fix and made it not apply to platformer checkpoints
+- Updated practice bug fix and auto disable it in platformer when not recording
 - Added an experimental lock delta audio sync
+- Fixed macro list being too small when having many macros saved
+- Added an experimental features button
 
 # v0.2.6-beta
 

@@ -45,21 +45,23 @@ class $modify(CatgirlsPlay, PlayLayer) {
 		CatgirlsPlay* catgirlsPlay = static_cast<CatgirlsPlay*>(CatgirlsPlay::get());
 		
 		PlayLayer::loadFromCheckpoint(checkpoint);
-		if (Mod::get()->getSettingValue<bool>("practice-fix") && catgirlsPlay->m_fields->m_checkpoints.contains(checkpoint)) {
-			CheckpointSave& save = catgirlsPlay->m_fields->m_checkpoints[checkpoint];
-			save.apply(catgirlsPlay->m_player1, catgirlsPlay->m_gameState.m_isDualMode ? catgirlsPlay->m_player2 : nullptr);
-			geode::log::debug("checkpoint loaded");
-			if (typeinfo_cast<CheckpointGameObject*>(checkpoint->m_physicalCheckpointObject)) {
-				geode::log::debug("catgirl catgirl catgirl catgirl");
+		if (uwuBot::catgirl->m_state != state::off || !this->m_isPlatformer) {
+			if (Mod::get()->getSettingValue<bool>("practice-fix") && catgirlsPlay->m_fields->m_checkpoints.contains(checkpoint)) {
+				CheckpointSave& save = catgirlsPlay->m_fields->m_checkpoints[checkpoint];
+				save.apply(catgirlsPlay->m_player1, catgirlsPlay->m_gameState.m_isDualMode ? catgirlsPlay->m_player2 : nullptr);
+				geode::log::debug("checkpoint loaded");
+				if (typeinfo_cast<CheckpointGameObject*>(checkpoint->m_physicalCheckpointObject)) {
+					geode::log::debug("catgirl catgirl catgirl catgirl");
+				}
+				//Button "fix" and feature
+				/*for (size_t i = 0; i < catgirlsPlay->m_fields->m_latestButtons.size(); i++) {
+					if (i > 2 && !catgirlsPlay->m_gameState.m_isDualMode) break; //If no second player then dont do second player stuff
+					auto player = catgirlsPlay->m_player1;
+					if (i > 2) player = catgirlsPlay->m_player2;
+					auto button = (player->m_holdingButtons[i%3]);
+					if (button != catgirlsPlay->m_fields->m_latestButtons[i]) catgirlsPlay->handleButton(button, i%3, (i > 2));
+				}*/
 			}
-			//Button "fix" and feature
-			/*for (size_t i = 0; i < catgirlsPlay->m_fields->m_latestButtons.size(); i++) {
-				if (i > 2 && !catgirlsPlay->m_gameState.m_isDualMode) break; //If no second player then dont do second player stuff
-				auto player = catgirlsPlay->m_player1;
-				if (i > 2) player = catgirlsPlay->m_player2;
-				auto button = (player->m_holdingButtons[i%3]);
-				if (button != catgirlsPlay->m_fields->m_latestButtons[i]) catgirlsPlay->handleButton(button, i%3, (i > 2));
-			}*/
 		}
 
 		auto frame = uwuBot::catgirl->getCurrentFrame();
@@ -205,26 +207,6 @@ class $modify(GJBaseGameLayer) {
 		if (uwuBot::catgirl->frameLabel != nullptr) {
 			uwuBot::catgirl->frameLabel->setString(fmt::format("Frame: {}", uwuBot::catgirl->getCurrentFrame()).c_str());
 		}
-		if (uwuBot::catgirl->m_state != state::off) {
-			if (Mod::get()->getSettingValue<bool>("lock-delta")) {
-				if (Mod::get()->getSettingValue<bool>("lock-delta-audio")) {
-					auto songPos = (m_gameState.m_currentProgress / 240.f) * 1000.f;
-					songPos += m_levelSettings->m_songOffset * 1000.f;
-
-					FMOD::Channel* channel;
-
-					for (size_t i = 0; i < 2; i++) {
-						FMODAudioEngine::sharedEngine()->m_system->getChannel(126 + i, &channel);
-						if (channel) {
-							uint32_t channelPos = 0;
-							channel->getPosition(&channelPos, FMOD_TIMEUNIT_MS);
-							if (channelPos <= 0) continue;
-							if (channelPos - songPos > 0.05f) channel->setPosition(songPos, FMOD_TIMEUNIT_MS);
-						}
-					}
-				}
-			}
-		}
 		GJBaseGameLayer::update(dt);
 	}
 
@@ -279,9 +261,29 @@ class $modify(CCScheduler) {
 		}
 		auto dt2 = dt;
 		float audioSpeed = 1.f;
-		if (uwuBot::catgirl->m_state != state::off) {
+		if (uwuBot::catgirl->m_state != state::off && !PlayLayer::get()->m_isPaused) {
 			if (Mod::get()->getSettingValue<bool>("lock-delta")) {
 				dt2 = 1.f / 240.f;
+				if (auto uwu = GJBaseGameLayer::get()) {
+					if (Mod::get()->getSettingValue<bool>("lock-delta-audio")) {
+						auto songPos = (uwu->m_gameState.m_currentProgress / 240.f) * 1000.f;
+						songPos += uwu->m_levelSettings->m_songOffset * 1000.f;
+
+						FMOD::Channel* channel;
+
+						for (size_t i = 0; i < 2; i++) {
+							FMODAudioEngine::sharedEngine()->m_system->getChannel(126 + i, &channel);
+							if (channel) {
+								uint32_t channelPos = 0;
+								channel->getPosition(&channelPos, FMOD_TIMEUNIT_MS);
+								if (channelPos <= 0) continue;
+								if (channelPos - songPos > 0.05f) {
+									audioSpeed *= 1.f / ((channelPos - songPos + (1000.f / 240.f)) / (1000.f / 240.f)); //Math >w<
+								}
+							}
+						}
+					}
+				}
 			}
 
 			std::stringstream ss;
@@ -298,13 +300,7 @@ class $modify(CCScheduler) {
 		for (size_t i = 0; i < 2; i++) {
 			FMOD::Channel* channel;
 			FMODAudioEngine::sharedEngine()->m_system->getChannel(126 + i, &channel);
-			if (channel) {
-				FMOD::Sound* sound;
-				channel->getCurrentSound(&sound);
-				float freq;
-				sound->getDefaults(&freq, nullptr);
-				channel->setFrequency(freq * audioSpeed);
-			}
+			if (channel) channel->setPitch(audioSpeed);
 		}
 		CCScheduler::update(dt2);
 	}
