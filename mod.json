@@ -10,6 +10,13 @@
 	"developer": "sheepdotcom",
 	"description": "A great bot with advanced features (coming soon)",
 	"repository": "https://github.com/sheepdotcom/uBot",
+	"dependencies": [
+		{
+			"id": "geode.node-ids",
+			"version": ">=1.13.0",
+			"importance": "required"
+		}
+	],
 	"settings": {
 		"enable-speedhack": {
 			"name": "Enable Speedhack",

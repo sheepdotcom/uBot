@@ -6,6 +6,7 @@
 - Fixed macro list not allowing you to scroll down far enough when many macros are saved
 - Added a disable platformer checkpoints setting
 - Added an experimental features setting
+- Added node ids as a dependency
 
 # v0.2.6-beta
 

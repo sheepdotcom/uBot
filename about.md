@@ -2,7 +2,7 @@
 
 A simple bot to record and replay macros, but also comes with many advanced features (coming soon were still in beta)
 
-Current Status: Working very accurately
+Current Status: Working very accurately EXCEPT FOR PLATFORMERS
 
 TASing platformers is annoying currently because you cant buffer inputs in the pause menu yet.
 Also buffering inputs before loading a checkpoint doesnt work yet.
@@ -12,6 +12,7 @@ Also buffering inputs before loading a checkpoint doesnt work yet.
 A list of features that are to be added in the future. <cr>Red</c> means it hasnt been started yet, <cy>Yellow</c> means it is being worked on, and <cg>Green</c> means it is finished.
 
 - <cg>Practice Bug Fix</c>
+- <cr>Safe Mode</c>
 - <cr>Frame Advance</c>
 - <cr>Show Trajectory</c>
 - <cr>Show Hitboxes</c>

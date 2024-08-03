@@ -12,6 +12,8 @@
 
 using namespace geode::prelude;
 
+//Little note I want to put here, you may notice that some variable, class, and hook names are related to catgirls, I'm just wierd
+
 class $modify(CatgirlsPlay, PlayLayer) {
 	struct Fields {
 		std::unordered_map<CheckpointObject*, CheckpointSave> m_checkpoints;
@@ -31,13 +33,27 @@ class $modify(CatgirlsPlay, PlayLayer) {
 	}
 
 	void resetLevel() {
+		CatgirlsPlay* catgirlsPlay = static_cast<CatgirlsPlay*>(CatgirlsPlay::get());
 		if (m_checkpointArray->count() <= 0) {
 			m_fields->m_checkpoints.clear();
 			m_fields->m_platformerCheckpoints.clear();
 		}
 
+		CCArray* savedCheckpointArray = m_checkpointArray; //Save the checkpoint array
+		if (uwuBot::catgirl->m_state != state::off && Mod::get()->getSettingValue<bool>("disable-checkpoints")) {
+			auto checkpointList = CCArrayExt<CheckpointObject*>(m_checkpointArray);
+			for (auto nya = checkpointList.rbegin(); nya != checkpointList.rend(); nya++) {
+				if (catgirlsPlay->m_fields->m_platformerCheckpoints.contains(*nya)) {
+					m_checkpointArray->removeObject(*nya, false); //WHY DOES SETTING RELEASE OBJECT TO TRUE BREAK THIS CODE
+				}
+			}
+		}
+
 		PlayLayer::resetLevel();
 		uwuBot::catgirl->updateLabels();
+
+		geode::log::debug("nya {} {}", m_checkpointArray, savedCheckpointArray);
+		//m_checkpointArray = savedCheckpointArray; //Set the checkpoint array to our saved checkpoint array
 
 		if (m_checkpointArray->count() > 0) return;
 		uwuBot::catgirl->m_currentAction = 0;
@@ -55,6 +71,7 @@ class $modify(CatgirlsPlay, PlayLayer) {
 	void loadFromCheckpoint(CheckpointObject* checkpoint) {
 		CatgirlsPlay* catgirlsPlay = static_cast<CatgirlsPlay*>(CatgirlsPlay::get());
 		if (uwuBot::catgirl->m_state != state::off && Mod::get()->getSettingValue<bool>("disable-checkpoints")) {
+			//Not needed because of what I put in resetLevel but I will keep it just incase :3
 			auto checkpointList = CCArrayExt<CheckpointObject*>(m_checkpointArray);
 			for (auto nya = checkpointList.rbegin(); nya != checkpointList.rend(); nya++) {
 				checkpoint = *nya;
@@ -139,7 +156,6 @@ class $modify(CheckpointObject) {
 				CheckpointSave save(catgirlsPlay->m_player1, catgirlsPlay->m_gameState.m_isDualMode ? catgirlsPlay->m_player2 : nullptr);
 				catgirlsPlay->m_fields->m_checkpoints[this] = save;
 				if (catgirlsPlay->m_fields->m_lastPlatformerCheckpoint) {
-					geode::log::debug("please help the catgirls >w<");
 					catgirlsPlay->m_fields->m_platformerCheckpoints[this] = catgirlsPlay->m_fields->m_lastPlatformerCheckpoint;
 					catgirlsPlay->m_fields->m_lastPlatformerCheckpoint = nullptr;
 				}
