@@ -55,7 +55,7 @@
 		},
 		"practice-fix": {
 			"name": "Practice Bug Fix",
-			"description": "Fixes checkpoints not properly saving and loading player data and inturn creating small inaccuracies",
+			"description": "Fixes checkpoints not properly saving and loading player data which could cause small inaccuracies",
 			"type": "bool",
 			"default": true
 		},
