@@ -84,6 +84,15 @@ class $modify(CatgirlsPlay, PlayLayer) {
 			if (!catgirlsPlay->m_fields->m_platformerCheckpoints.contains(checkpoint)) {
 				CheckpointSave& save = catgirlsPlay->m_fields->m_checkpoints[checkpoint];
 				save.apply(catgirlsPlay->m_player1, catgirlsPlay->m_gameState.m_isDualMode ? catgirlsPlay->m_player2 : nullptr);
+				for (std::pair<int, bool> btn : save.m_playerSave1.m_holdingButtons) {
+					if (btn.second) this->handleButton(false, btn.first, true);
+				}
+				if (catgirlsPlay->m_gameState.m_isDualMode) {
+					for (std::pair<int, bool> btn : save.m_playerSave2.m_holdingButtons) {
+						if (btn.second) this->handleButton(false, btn.first, false);
+					}
+				}
+				geode::log::debug("mrrow meow {} {}", save.m_playerSave1.m_holdingLeft, save.m_playerSave1.m_holdingRight);
 			}
 			//Button "fix" and feature
 			/*for (size_t i = 0; i < catgirlsPlay->m_fields->m_latestButtons.size(); i++) {
@@ -183,9 +192,10 @@ class $modify(PauseLayer) {
 		PauseLayer::customSetup();
 
 		auto sprite = CCSprite::createWithSpriteFrameName("GJ_playBtn2_001.png"); //Yes this is the texture used in xdBot idc right now this is alpha
-		sprite->setScale(0.35f);
+		sprite->setScale(0.375f);
 
 		auto btn = CCMenuItemSpriteExtra::create(sprite, this, menu_selector(MacroPopup::openPopup));
+		btn->setID("ubot-macro-button");
 
 		auto rightMenu = this->getChildByID("right-button-menu");
 		rightMenu->addChild(btn);
@@ -208,12 +218,12 @@ class $modify(GJBaseGameLayer) {
 		GJBaseGameLayer::handleButton(holding, button, player1);
 		//geode::log::debug("{} {} {}", holding, button, player1);
 		//Update latest button list :3
-		for (PlayerButtonCommand button : GJBaseGameLayer::get()->m_queuedButtons) {
+		/*for (PlayerButtonCommand button : GJBaseGameLayer::get()->m_queuedButtons) {
 			auto btn = static_cast<size_t>(button.m_button);
 			auto i = btn + (button.m_isPlayer2 ? 3 : 0);
 			auto catgirlsPlay = static_cast<CatgirlsPlay*>(CatgirlsPlay::get());
 			catgirlsPlay->m_fields->m_latestButtons[i] = button.m_isPush;
-		}
+		}*/
 
 		if (uwuBot::catgirl->m_state == state::recording) {
 			playerData pData;

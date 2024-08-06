@@ -114,6 +114,7 @@ public:
 class SaveMacroPopup : public CCLayerColor, public TextInputDelegate {
 protected:
 	TextInput* m_macroNameInput = nullptr;
+	ScrollLayer* m_scrollLayer = nullptr;
 
 	bool init(float mWidth, float mHeight);
 	static SaveMacroPopup* create();

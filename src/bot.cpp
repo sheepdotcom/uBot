@@ -428,8 +428,8 @@ PlayerSaveObject::PlayerSaveObject(PlayerObject* player) {
 	m_maybeStateForce2 = player->m_maybeStateForce2;
 	m_stateScale = player->m_stateScale;
 	m_platformerXVelocity = player->m_platformerXVelocity;
-	//m_holdingRight = player->m_holdingRight;
-	//m_holdingLeft = player->m_holdingLeft;
+	m_holdingRight = player->m_holdingRight;
+	m_holdingLeft = player->m_holdingLeft;
 	m_leftPressedFirst = player->m_leftPressedFirst;
 	m_scaleXRelated = player->m_scaleXRelated;
 	m_maybeHasStopped = player->m_maybeHasStopped;
@@ -491,11 +491,11 @@ PlayerSaveObject::PlayerSaveObject(PlayerObject* player) {
 #endif
 	m_playerFollowFloats = player->m_playerFollowFloats;
 	m_jumpPadRelated = player->m_jumpPadRelated;
-	//m_holdingButtons = player->m_holdingButtons;
+	m_holdingButtons = player->m_holdingButtons;
 
 	//Custom fields
-	m_xPosition = player->getPositionX();
-	m_yPosition = player->getPositionY();
+	m_xPosition = player->m_position.x;
+	m_yPosition = player->m_position.y;
 }
 
 void PlayerSaveObject::apply(PlayerObject* player) {
@@ -677,8 +677,8 @@ void PlayerSaveObject::apply(PlayerObject* player) {
 	player->m_maybeStateForce2 = m_maybeStateForce2;
 	player->m_stateScale = m_stateScale;
 	player->m_platformerXVelocity = m_platformerXVelocity;
-	//player->m_holdingRight = m_holdingRight;
-	//player->m_holdingLeft = m_holdingLeft;
+	player->m_holdingRight = m_holdingRight;
+	player->m_holdingLeft = m_holdingLeft;
 	player->m_leftPressedFirst = m_leftPressedFirst;
 	player->m_scaleXRelated = m_scaleXRelated;
 	player->m_maybeHasStopped = m_maybeHasStopped;
@@ -740,9 +740,8 @@ void PlayerSaveObject::apply(PlayerObject* player) {
 #endif
 	player->m_playerFollowFloats = m_playerFollowFloats;
 	player->m_jumpPadRelated = m_jumpPadRelated;
-	//player->m_holdingButtons = m_holdingButtons;
+	player->m_holdingButtons = m_holdingButtons;
 
 	//Custom fields
-	player->setPositionX(m_xPosition);
-	player->setPositionY(m_yPosition);
+	player->m_position = ccp(m_xPosition, m_yPosition);
 }

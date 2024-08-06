@@ -75,7 +75,6 @@ public:
 
 	void apply(PlayerObject* player);
 
-private:
 	//I copied these from the bindings then manually filtered out ones I don't need (Updated from commit 5d262f1)
 	bool m_wasTeleported;
 	bool m_fixGravityBug;
@@ -255,8 +254,8 @@ private:
 	int m_maybeStateForce2;
 	int m_stateScale;
 	double m_platformerXVelocity;
-	//bool m_holdingRight;
-	//bool m_holdingLeft;
+	bool m_holdingRight;
+	bool m_holdingLeft;
 	bool m_leftPressedFirst;
 	double m_scaleXRelated;
 	bool m_maybeHasStopped;
@@ -311,7 +310,7 @@ private:
 	gd::unordered_set<int> m_touchedRings;
 	gd::vector<float> m_playerFollowFloats;
 	gd::map<int, bool> m_jumpPadRelated;
-	//gd::map<int, bool> m_holdingButtons; //Disabled until I make the fix/feature that ybot has (pre-input in the PauseLayer)
+	gd::map<int, bool> m_holdingButtons; //Disabled until I make the fix/feature that ybot has (pre-input in the PauseLayer)
 
 	//Custom fields
 	float m_xPosition;
@@ -332,7 +331,6 @@ public:
 		if (p2) m_playerSave2.apply(p2);
 	}
 
-private:
 	PlayerSaveObject m_playerSave1;
 	PlayerSaveObject m_playerSave2;
 };

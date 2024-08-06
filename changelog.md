@@ -4,6 +4,8 @@
 - Updated practice bug fix and made it no longer apply to platformer level checkpoints
 - Added an experimental lock delta audio sync
 - Fixed macro list not allowing you to scroll down far enough when many macros are saved
+- Changed the macro list slightly
+- Slightly tweak the button to open the macro popup
 - Added a disable platformer checkpoints setting
 - Added an experimental features setting
 - Added node ids as a dependency

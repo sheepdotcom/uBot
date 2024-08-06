@@ -269,14 +269,14 @@ bool SaveMacroPopup::init(float mWidth, float mHeight) {
 	scrollBG->setOpacity(100.f);
 	scrollBG->setID("macro-scroll-bg");
 	menu->addChild(scrollBG);
-	auto scroll = ScrollLayer::create(scrollBG->getContentSize(), true, true);
-	scroll->setContentSize(scrollBG->getContentSize());
-	scroll->setPosition(winSize/2 - (scroll->getContentSize()/2) + (scrollBG->getPosition() - winSize/2));
-	scroll->setID("macro-scroll-layer");
+	m_scrollLayer = ScrollLayer::create(scrollBG->getContentSize(), true, true);
+	m_scrollLayer->setContentSize(scrollBG->getContentSize());
+	m_scrollLayer->setPosition(winSize/2 - (m_scrollLayer->getContentSize()/2) + (scrollBG->getPosition() - winSize/2));
+	m_scrollLayer->setID("macro-scroll-layer");
 	auto macroList = getMacroList();
-	refreshMacroList(scroll, macroList, false);
-	scroll->scrollToTop();
-	menu->addChild(scroll);
+	refreshMacroList(m_scrollLayer, macroList, false);
+	m_scrollLayer->scrollToTop();
+	menu->addChild(m_scrollLayer);
 
 	//Is that the save button?
 	auto saveSprite = ButtonSprite::create("Save");
@@ -349,6 +349,9 @@ void SaveMacroPopup::saveMacro(CCObject* p0) {
 		FLAlertLayer::create("Save Macro", "Macro successfully saved!", "OK")->show();
 		break;
 	}
+
+	auto macroList = getMacroList();
+	refreshMacroList(this->m_scrollLayer, macroList, false);
 }
 
 bool LoadMacroPopup::init(float mWidth, float mHeight) {
