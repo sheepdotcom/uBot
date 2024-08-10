@@ -52,7 +52,6 @@ class $modify(CatgirlsPlay, PlayLayer) {
 		PlayLayer::resetLevel();
 		uwuBot::catgirl->updateLabels();
 
-		geode::log::debug("nya {} {}", m_checkpointArray, savedCheckpointArray);
 		//m_checkpointArray = savedCheckpointArray; //Set the checkpoint array to our saved checkpoint array
 
 		if (m_checkpointArray->count() > 0) return;
@@ -84,15 +83,16 @@ class $modify(CatgirlsPlay, PlayLayer) {
 			if (!catgirlsPlay->m_fields->m_platformerCheckpoints.contains(checkpoint)) {
 				CheckpointSave& save = catgirlsPlay->m_fields->m_checkpoints[checkpoint];
 				save.apply(catgirlsPlay->m_player1, catgirlsPlay->m_gameState.m_isDualMode ? catgirlsPlay->m_player2 : nullptr);
-				for (std::pair<int, bool> btn : save.m_playerSave1.m_holdingButtons) {
-					if (btn.second) this->handleButton(false, btn.first, true);
-				}
-				if (catgirlsPlay->m_gameState.m_isDualMode) {
-					for (std::pair<int, bool> btn : save.m_playerSave2.m_holdingButtons) {
-						if (btn.second) this->handleButton(false, btn.first, false);
+				if (uwuBot::catgirl->m_state != state::playing) {
+					for (std::pair<int, bool> btn : save.m_playerSave1.m_holdingButtons) {
+						if (btn.second) this->handleButton(false, btn.first, true);
+					}
+					if (catgirlsPlay->m_gameState.m_isDualMode) {
+						for (std::pair<int, bool> btn : save.m_playerSave2.m_holdingButtons) {
+							if (btn.second) this->handleButton(false, btn.first, false);
+						}
 					}
 				}
-				geode::log::debug("mrrow meow {} {}", save.m_playerSave1.m_holdingLeft, save.m_playerSave1.m_holdingRight);
 			}
 			//Button "fix" and feature
 			/*for (size_t i = 0; i < catgirlsPlay->m_fields->m_latestButtons.size(); i++) {

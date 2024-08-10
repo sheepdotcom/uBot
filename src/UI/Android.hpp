@@ -128,6 +128,7 @@ public:
 class LoadMacroPopup : public CCLayerColor {
 protected:
 	TextInput* m_macroNameInput = nullptr;
+	ScrollLayer* m_scrollLayer = nullptr;
 
 	bool init(float mWidth, float mHeight);
 	static LoadMacroPopup* create();

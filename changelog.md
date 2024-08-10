@@ -1,3 +1,8 @@
+# v0.3.1-beta
+
+- Removed one debug log that could spam the logs with useless data
+- Minor fix to load macro popup
+
 # v0.3.0-beta
 
 - Updated to geode v3.4.0

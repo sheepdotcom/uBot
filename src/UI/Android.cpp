@@ -391,13 +391,14 @@ bool LoadMacroPopup::init(float mWidth, float mHeight) {
 	scrollBG->setOpacity(100.f);
 	scrollBG->setID("macro-scroll-bg");
 	menu->addChild(scrollBG);
-	auto scroll = ScrollLayer::create(scrollBG->getContentSize(), true, true);
-	scroll->setContentSize(scrollBG->getContentSize());
-	scroll->setPosition(winSize / 2 - (scroll->getContentSize() / 2) + (scrollBG->getPosition() - winSize / 2));
-	scroll->setID("macro-scroll-layer");
+	m_scrollLayer = ScrollLayer::create(scrollBG->getContentSize(), true, true);
+	m_scrollLayer->setContentSize(scrollBG->getContentSize());
+	m_scrollLayer->setPosition(winSize / 2 - (m_scrollLayer->getContentSize() / 2) + (scrollBG->getPosition() - winSize / 2));
+	m_scrollLayer->setID("macro-scroll-layer");
 	auto macroList = getMacroList();
-	refreshMacroList(scroll, macroList, true);
-	menu->addChild(scroll);
+	refreshMacroList(m_scrollLayer, macroList, true);
+	m_scrollLayer->scrollToTop();
+	menu->addChild(m_scrollLayer);
 
 	//Load Button
 	auto loadSprite = ButtonSprite::create("Load");
