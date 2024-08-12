@@ -4,5 +4,4 @@ A simple bot to record and replay macros, but also comes with many advanced feat
 
 Current Status: Working very accurately except for platformers in which it will most likely fail
 
-TASing platformers is annoying currently because you cant buffer inputs in the pause menu yet.
-Also buffering inputs before loading a checkpoint doesnt work yet.
+TASing platformer is probably not possible right now since there is some major issue causing platformer macros to record incorrectly.

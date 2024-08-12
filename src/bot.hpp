@@ -74,7 +74,8 @@ public:
 	PlayerSaveObject(PlayerObject* player);
 
 	void apply(PlayerObject* player);
-
+	
+private:
 	//I copied these from the bindings then manually filtered out ones I don't need (Updated from commit 5d262f1)
 	bool m_wasTeleported;
 	bool m_fixGravityBug;
@@ -321,16 +322,29 @@ class CheckpointSave {
 public:
 	CheckpointSave() = default;
 
-	CheckpointSave(PlayerObject* p1, PlayerObject* p2) {
-		m_playerSave1 = PlayerSaveObject(p1);
-		if (p2) m_playerSave2 = PlayerSaveObject(p2);
+	CheckpointSave(PlayLayer* playLayer) {
+		if (playLayer) {
+			m_playerSave1 = PlayerSaveObject(playLayer->m_player1);
+			if (playLayer->m_gameState.m_isDualMode) m_playerSave2 = PlayerSaveObject(playLayer->m_player2);
+			m_timePlayed = playLayer->m_timePlayed;
+			m_seed = *(int*)((char*)geode::base::get() + 0x687dd0);
+		}
 	}
 
-	void apply(PlayerObject* p1, PlayerObject* p2) {
-		m_playerSave1.apply(p1);
-		if (p2) m_playerSave2.apply(p2);
+	void apply(PlayLayer* playLayer) {
+		if (playLayer) {
+			m_playerSave1.apply(playLayer->m_player1);
+			if (playLayer->m_gameState.m_isDualMode) m_playerSave2.apply(playLayer->m_player2);
+			if (uwuBot::catgirl->m_state != state::off) {
+				playLayer->m_timePlayed = m_timePlayed;
+				*(int*)((char*)geode::base::get() + 0x687dd0) = m_seed;
+			}
+		}
 	}
 
+private:
 	PlayerSaveObject m_playerSave1;
 	PlayerSaveObject m_playerSave2;
+	double m_timePlayed = 0.0;
+	int m_seed = 0;
 };

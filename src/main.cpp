@@ -15,11 +15,15 @@ using namespace geode::prelude;
 //Little note I want to put here, you may notice that some variable, class, and hook names are related to catgirls, I'm just wierd
 
 class $modify(CatgirlsPlay, PlayLayer) {
+	static void onModify(auto& self) {
+		self.setHookPriority("PlayLayer::loadFromCheckpoint", -1025);
+	}
+
 	struct Fields {
 		std::unordered_map<CheckpointObject*, CheckpointSave> m_checkpoints;
 		std::unordered_map<CheckpointObject*, CheckpointGameObject*> m_platformerCheckpoints;
-		std::vector<bool> m_latestButtons = {false, false, false, false, false, false}; //Vector  (p1 is first 3, p2 is last 3)
-		bool m_justPaused = false;
+		bool m_hasResetLevelButHasntMadeAnyInputsYet = false;
+		bool m_hasJustPaused = false;
 		CheckpointGameObject* m_lastPlatformerCheckpoint = nullptr;
 	};
 
@@ -58,7 +62,8 @@ class $modify(CatgirlsPlay, PlayLayer) {
 		uwuBot::catgirl->m_currentAction = 0;
 
 		if (uwuBot::catgirl->m_state != state::recording) return;
-		if (!uwuBot::catgirl->m_macroData.empty()) uwuBot::catgirl->m_macroData.clear();
+		m_fields->m_hasResetLevelButHasntMadeAnyInputsYet = true;
+		//if (!uwuBot::catgirl->m_macroData.empty()) uwuBot::catgirl->m_macroData.clear();
 	}
 
 	void checkpointActivated(CheckpointGameObject* checkpoint) {
@@ -82,13 +87,13 @@ class $modify(CatgirlsPlay, PlayLayer) {
 		if (Mod::get()->getSettingValue<bool>("practice-fix") && catgirlsPlay->m_fields->m_checkpoints.contains(checkpoint)) {
 			if (!catgirlsPlay->m_fields->m_platformerCheckpoints.contains(checkpoint)) {
 				CheckpointSave& save = catgirlsPlay->m_fields->m_checkpoints[checkpoint];
-				save.apply(catgirlsPlay->m_player1, catgirlsPlay->m_gameState.m_isDualMode ? catgirlsPlay->m_player2 : nullptr);
+				save.apply(catgirlsPlay);
 				if (uwuBot::catgirl->m_state != state::playing) {
-					for (std::pair<int, bool> btn : save.m_playerSave1.m_holdingButtons) {
+					for (std::pair<int, bool> btn : catgirlsPlay->m_player1->m_holdingButtons) {
 						if (btn.second) this->handleButton(false, btn.first, true);
 					}
 					if (catgirlsPlay->m_gameState.m_isDualMode) {
-						for (std::pair<int, bool> btn : save.m_playerSave2.m_holdingButtons) {
+						for (std::pair<int, bool> btn : catgirlsPlay->m_player2->m_holdingButtons) {
 							if (btn.second) this->handleButton(false, btn.first, false);
 						}
 					}
@@ -120,18 +125,18 @@ class $modify(CatgirlsPlay, PlayLayer) {
 
 	void pauseGame(bool paused) {
 		uwuBot::catgirl->resetAudioSpeed();
-		auto catgirlsPlay = static_cast<CatgirlsPlay*>(CatgirlsPlay::get());
-		catgirlsPlay->m_fields->m_justPaused = true;
+		CatgirlsPlay* catgirlsPlay = static_cast<CatgirlsPlay*>(CatgirlsPlay::get());
+		catgirlsPlay->m_fields->m_hasJustPaused = true;
 		PlayLayer::pauseGame(paused);
-		catgirlsPlay->m_fields->m_justPaused = false;
+		catgirlsPlay->m_fields->m_hasJustPaused = false;
 	}
 
 	void resume() {
 		uwuBot::catgirl->resetAudioSpeed();
-		auto catgirlsPlay = static_cast<CatgirlsPlay*>(CatgirlsPlay::get());
-		catgirlsPlay->m_fields->m_justPaused = true;
+		CatgirlsPlay* catgirlsPlay = static_cast<CatgirlsPlay*>(CatgirlsPlay::get());
+		catgirlsPlay->m_fields->m_hasJustPaused = true;
 		PlayLayer::resume();
-		catgirlsPlay->m_fields->m_justPaused = false;
+		catgirlsPlay->m_fields->m_hasJustPaused = false;
 	}
 
 	void onQuit() {
@@ -162,7 +167,7 @@ class $modify(CheckpointObject) {
 		if (Mod::get()->getSettingValue<bool>("practice-fix")) {
 			CatgirlsPlay* catgirlsPlay = static_cast<CatgirlsPlay*>(CatgirlsPlay::get());
 			if (uwuBot::catgirl->getCurrentFrame() > 0) {
-				CheckpointSave save(catgirlsPlay->m_player1, catgirlsPlay->m_gameState.m_isDualMode ? catgirlsPlay->m_player2 : nullptr);
+				CheckpointSave save(catgirlsPlay);
 				catgirlsPlay->m_fields->m_checkpoints[this] = save;
 				if (catgirlsPlay->m_fields->m_lastPlatformerCheckpoint) {
 					catgirlsPlay->m_fields->m_platformerCheckpoints[this] = catgirlsPlay->m_fields->m_lastPlatformerCheckpoint;
@@ -179,12 +184,14 @@ class $modify(PlayerObject) {
 		PlayerObject::playerDestroyed(p0);
 	}
 
-	/*void releaseAllButtons() {
-		auto catgirlsPlay = static_cast<CatgirlsPlay*>(CatgirlsPlay::get());
-		//Do this instead so I dont have to patch PlayLayer::pauseGame
-		if (!catgirlsPlay->m_fields->m_justPaused) PlayerObject::releaseAllButtons();
-		geode::log::debug("release buttons {}", catgirlsPlay->m_fields->m_justPaused);
-	}*/
+	void releaseAllButtons() {
+		//Make it so pausing doesn't break replaying
+		if (uwuBot::catgirl->m_state == state::playing) {
+			auto catgirlsPlay = static_cast<CatgirlsPlay*>(CatgirlsPlay::get());
+			if (catgirlsPlay->m_fields->m_hasJustPaused) return;
+		}
+		PlayerObject::releaseAllButtons();
+	}
 };
 
 class $modify(PauseLayer) {
@@ -225,7 +232,12 @@ class $modify(GJBaseGameLayer) {
 			catgirlsPlay->m_fields->m_latestButtons[i] = button.m_isPush;
 		}*/
 
+		auto catgirlsPlay = static_cast<CatgirlsPlay*>(CatgirlsPlay::get());
 		if (uwuBot::catgirl->m_state == state::recording) {
+			if (catgirlsPlay->m_fields->m_hasResetLevelButHasntMadeAnyInputsYet) {
+				catgirlsPlay->m_fields->m_hasResetLevelButHasntMadeAnyInputsYet = false;
+				if (!uwuBot::catgirl->m_macroData.empty()) uwuBot::catgirl->m_macroData.clear();
+			}
 			playerData pData;
 			auto player = (player1) ? this->m_player1 : this->m_player2; //Saves some code :3
 			auto isFrameFix = Mod::get()->getSettingValue<bool>("frame-fix");

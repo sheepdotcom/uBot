@@ -1,3 +1,9 @@
+# v0.3.2-beta
+
+- Updated practice bug fix and made some things for recording/replaying only
+- Macro no longer gets cleared instantly upon full reset but waits for an input while recording.
+- Replaying a macro no longer breaks when pausing unless you use space to unpause
+
 # v0.3.1-beta
 
 - Removed one debug log that could spam the logs with useless data
